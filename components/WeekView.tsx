@@ -115,7 +115,7 @@ const WeekView: React.FC<WeekViewProps> = ({ date, onSelectDate, onUpdate, refre
   }
 
   return (
-    <div className="premium-card rounded-[2.5rem] bg-white overflow-hidden animate-in fade-in slide-in-from-bottom-6 duration-700">
+    <div className="premium-card rounded-[2.5rem] bg-white overflow-hidden animate-in fade-in slide-in-from-bottom-6 duration-700 mb-20">
       <div className="overflow-x-auto custom-scrollbar">
         <div className="min-w-[1100px]">
           {/* Header Row */}

@@ -164,7 +164,7 @@ const DayView: React.FC<DayViewProps> = ({ date, onUpdate, refreshKey }) => {
   );
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-8 pb-10">
       <div className="flex flex-col md:flex-row items-start md:items-end justify-between px-2 gap-4">
          <div>
             <div className="flex items-center gap-2 mb-1">
@@ -373,7 +373,7 @@ const DayView: React.FC<DayViewProps> = ({ date, onUpdate, refreshKey }) => {
                   />
                </div>
 
-               <div className="relative pl-12 space-y-4">
+               <div className="relative pl-12 space-y-4 mb-10">
                   <div className="absolute left-6 top-0 bottom-0 w-px bg-gradient-to-b from-indigo-500 via-indigo-100 to-transparent"></div>
                   {hours.map((hour) => {
                     const timeLabel = `${hour.toString().padStart(2, '0')}:00`;
