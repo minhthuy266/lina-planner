@@ -46,7 +46,7 @@
             overflow: hidden;
             position: fixed;
             width: 100%;
-            height: 100%;
+            height: 100dvh; /* Sử dụng dvh để chính xác tuyệt đối trên mobile */
             -webkit-font-smoothing: antialiased;
             touch-action: manipulation;
             padding-top: var(--sat);
@@ -62,7 +62,9 @@
             background: rgba(255, 255, 255, 0.85);
             backdrop-filter: blur(20px);
             border-top: 1px solid rgba(15, 23, 42, 0.05);
-            padding-bottom: calc(0.8rem + var(--sab));
+            /* Giảm padding bottom xuống mức tối thiểu cần thiết cho Safe Area */
+            padding-bottom: var(--sab);
+            height: calc(4.5rem + var(--sab));
         }
 
         .ios-prompt-animation {
@@ -74,9 +76,15 @@
             to { transform: translateY(0); opacity: 1; }
         }
 
-        /* Tối ưu hóa scroll cho mobile */
         .custom-scrollbar {
             -webkit-overflow-scrolling: touch;
+        }
+
+        /* Đảm bảo chiều cao app luôn khớp với view */
+        #root {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
         }
     </style>
 <script type="importmap">

@@ -87,7 +87,7 @@ const NavBtn: React.FC<{ icon: React.ReactNode; active: boolean; onClick: () => 
 );
 
 const MobileTab: React.FC<{ icon: React.ReactNode; active: boolean; onClick: () => void }> = ({ icon, active, onClick }) => (
-  <button onClick={onClick} className={`p-3 rounded-2xl transition-all ${active ? 'text-rose-500 bg-rose-50' : 'text-slate-400'}`}>{icon}</button>
+  <button onClick={onClick} className={`p-4 rounded-2xl transition-all ${active ? 'text-rose-500 bg-rose-50' : 'text-slate-400'}`}>{icon}</button>
 );
 
 export default function App() {
@@ -105,13 +105,9 @@ export default function App() {
   };
 
   useEffect(() => {
-    // Kiểm tra xem có đang chạy ở chế độ App (Standalone) không
     const isStandalone = (window.navigator as any).standalone || window.matchMedia('(display-mode: standalone)').matches;
-    
-    // Phát hiện iOS
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
     
-    // Hiện prompt cài đặt nếu là iOS và chưa cài đặt
     const hasPromptedInstall = localStorage.getItem('lumina_install_prompted');
     if (isIOS && !isStandalone && !hasPromptedInstall) {
       setTimeout(() => setShowInstallPrompt(true), 3000);
@@ -189,7 +185,7 @@ export default function App() {
   };
 
   return (
-    <div className="flex h-screen w-full bg-[#fcfcfd] text-slate-900 overflow-hidden flex-col lg:flex-row">
+    <div className="flex h-full w-full bg-[#fcfcfd] text-slate-900 overflow-hidden flex-col lg:flex-row">
       {showInstallPrompt && <IOSInstallPrompt onClose={() => { setShowInstallPrompt(false); localStorage.setItem('lumina_install_prompted', 'true'); }} />}
       
       {showNotificationPrompt && (
@@ -221,7 +217,7 @@ export default function App() {
       </aside>
 
       {/* Main Container */}
-      <div className="flex-1 flex flex-col min-w-0 pb-16 lg:pb-0">
+      <div className="flex-1 flex flex-col min-w-0">
         <header className="h-14 lg:h-16 bg-white/80 backdrop-blur-md border-b border-slate-100 flex items-center justify-between px-5 shrink-0 z-40">
           <div className="flex items-center gap-4">
             <div className="lg:hidden text-rose-500"><Zap size={22} className="fill-rose-500" /></div>
@@ -247,7 +243,7 @@ export default function App() {
         </header>
 
         <main className="flex-1 overflow-hidden relative">
-          <div className="absolute inset-0 overflow-y-auto custom-scrollbar p-4 lg:p-10">
+          <div className="absolute inset-0 overflow-y-auto custom-scrollbar p-4 lg:p-10 pb-24 lg:pb-10">
             <div className="max-w-6xl mx-auto page-transition" key={refreshKey}>
               {currentView === 'dashboard' && <Dashboard onNavigate={handleNavigate} onUpdate={triggerRefresh} />}
               {currentView === 'year' && <YearView onSelectDate={(d) => { setCurrentDate(d); setCurrentView('month'); }} refreshKey={refreshKey} />}
@@ -261,12 +257,12 @@ export default function App() {
 
         {/* Mobile Tab Bar */}
         <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 mobile-nav-glass">
-          <nav className="flex items-center justify-around px-4 pt-3">
-            <MobileTab icon={<Home size={24} />} active={currentView === 'dashboard'} onClick={() => handleNavigate('dashboard')} />
-            <MobileTab icon={<Calendar size={24} />} active={currentView === 'month'} onClick={() => handleNavigate('month')} />
-            <MobileTab icon={<Columns size={24} />} active={currentView === 'week'} onClick={() => handleNavigate('week')} />
-            <MobileTab icon={<Layout size={24} />} active={currentView === 'day'} onClick={() => handleNavigate('day', new Date())} />
-            <MobileTab icon={<LayoutDashboard size={24} />} active={currentView === 'vision'} onClick={() => handleNavigate('vision')} />
+          <nav className="flex items-center justify-around px-4">
+            <MobileTab icon={<Home size={22} />} active={currentView === 'dashboard'} onClick={() => handleNavigate('dashboard')} />
+            <MobileTab icon={<Calendar size={22} />} active={currentView === 'month'} onClick={() => handleNavigate('month')} />
+            <MobileTab icon={<Columns size={22} />} active={currentView === 'week'} onClick={() => handleNavigate('week')} />
+            <MobileTab icon={<Layout size={22} />} active={currentView === 'day'} onClick={() => handleNavigate('day', new Date())} />
+            <MobileTab icon={<LayoutDashboard size={22} />} active={currentView === 'vision'} onClick={() => handleNavigate('vision')} />
           </nav>
         </div>
       </div>
