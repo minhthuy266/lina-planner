@@ -12,9 +12,11 @@ import {
   Layers,
   Zap,
   Bell,
-  AlertTriangle,
-  Info,
-  Columns
+  Columns,
+  Key,
+  Share,
+  PlusSquare,
+  X
 } from 'lucide-react';
 import { ViewType } from './types';
 import Dashboard from './components/Dashboard';
@@ -26,6 +28,50 @@ import VisionBoard from './components/VisionBoard';
 import { dataService } from './services/dataService';
 import { format, addMonths } from 'date-fns';
 import { vi } from 'date-fns/locale/vi';
+
+// Helper component hướng dẫn cài đặt trên iOS
+const IOSInstallPrompt: React.FC<{ onClose: () => void }> = ({ onClose }) => (
+  <div className="fixed inset-x-0 bottom-0 z-[150] p-4 ios-prompt-animation">
+    <div className="bg-white/90 backdrop-blur-2xl rounded-[2.5rem] p-6 shadow-2xl border border-slate-100 relative">
+      <button onClick={onClose} className="absolute top-4 right-4 text-slate-300 hover:text-slate-900 transition-colors">
+        <X size={20} />
+      </button>
+      
+      <div className="flex items-center gap-4 mb-6">
+        <div className="w-14 h-14 bg-rose-500 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-rose-100">
+          <Zap size={28} className="fill-white" />
+        </div>
+        <div>
+          <h3 className="text-lg font-black text-slate-900 leading-tight">Cài đặt Lumina</h3>
+          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Trải nghiệm app toàn màn hình</p>
+        </div>
+      </div>
+
+      <div className="space-y-4">
+        <div className="flex items-center gap-4 bg-slate-50 p-4 rounded-2xl">
+          <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center shadow-sm text-blue-500">
+            <Share size={18} />
+          </div>
+          <p className="text-xs font-bold text-slate-600">Bấm vào nút <span className="text-slate-900 font-black">Chia sẻ (Share)</span> ở thanh dưới Safari.</p>
+        </div>
+        
+        <div className="flex items-center gap-4 bg-slate-50 p-4 rounded-2xl">
+          <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center shadow-sm text-slate-700">
+            <PlusSquare size={18} />
+          </div>
+          <p className="text-xs font-bold text-slate-600">Chọn <span className="text-slate-900 font-black">Thêm vào MH chính (Add to Home Screen)</span>.</p>
+        </div>
+      </div>
+
+      <button 
+        onClick={onClose}
+        className="w-full mt-6 bg-slate-900 text-white font-black py-4 rounded-2xl text-[10px] uppercase tracking-[0.2em] shadow-xl active:scale-95 transition-all"
+      >
+        Đã hiểu, thưa má!
+      </button>
+    </div>
+  </div>
+);
 
 const NavBtn: React.FC<{ icon: React.ReactNode; active: boolean; onClick: () => void; label: string }> = ({ icon, active, onClick, label }) => (
   <button 
@@ -49,23 +95,32 @@ export default function App() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [refreshKey, setRefreshKey] = useState(0);
   const [showNotificationPrompt, setShowNotificationPrompt] = useState(false);
-  const [notifError, setNotifError] = useState<string | null>(null);
+  const [showInstallPrompt, setShowInstallPrompt] = useState(false);
 
   const triggerRefresh = () => setRefreshKey(prev => prev + 1);
 
   const handleNavigate = (view: ViewType, date?: Date) => {
-    if (date) {
-      setCurrentDate(new Date(date));
-    }
+    if (date) setCurrentDate(new Date(date));
     setCurrentView(view);
   };
 
   useEffect(() => {
-    const hasPrompted = localStorage.getItem('lumina_notif_prompted');
+    // Kiểm tra xem có đang chạy ở chế độ App (Standalone) không
+    const isStandalone = (window.navigator as any).standalone || window.matchMedia('(display-mode: standalone)').matches;
+    
+    // Phát hiện iOS
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
+    
+    // Hiện prompt cài đặt nếu là iOS và chưa cài đặt
+    const hasPromptedInstall = localStorage.getItem('lumina_install_prompted');
+    if (isIOS && !isStandalone && !hasPromptedInstall) {
+      setTimeout(() => setShowInstallPrompt(true), 3000);
+    }
+
+    const hasPromptedNotif = localStorage.getItem('lumina_notif_prompted');
     if ("Notification" in window) {
-      if (Notification.permission === "default" && !hasPrompted) {
-        const timer = setTimeout(() => setShowNotificationPrompt(true), 1500);
-        return () => clearTimeout(timer);
+      if (Notification.permission === "default" && !hasPromptedNotif) {
+        setTimeout(() => setShowNotificationPrompt(true), 5000);
       } else if (Notification.permission === "granted") {
         checkDiscipline();
       }
@@ -88,23 +143,17 @@ export default function App() {
   };
 
   const requestNotificationPermission = async () => {
-    setNotifError(null);
-    if (!("Notification" in window)) {
-      setNotifError("Trình duyệt này không hỗ trợ thông báo má ơi!");
-      return;
-    }
+    if (!("Notification" in window)) return;
     try {
       const permission = await Notification.requestPermission();
       localStorage.setItem('lumina_notif_prompted', 'true');
       if (permission === "granted") {
         setShowNotificationPrompt(false);
         checkDiscipline();
-      } else if (permission === "denied") {
-        setNotifError("Má đã chặn thông báo rồi. Hãy bật lại trong cài đặt trình duyệt nhé!");
       } else {
         setShowNotificationPrompt(false);
       }
-    } catch (error) { setNotifError("Có lỗi xảy ra khi xin quyền."); }
+    } catch (error) { console.error("Notif req failed:", error); }
   };
 
   const navigateDate = (direction: 'prev' | 'next') => {
@@ -141,28 +190,23 @@ export default function App() {
 
   return (
     <div className="flex h-screen w-full bg-[#fcfcfd] text-slate-900 overflow-hidden flex-col lg:flex-row">
+      {showInstallPrompt && <IOSInstallPrompt onClose={() => { setShowInstallPrompt(false); localStorage.setItem('lumina_install_prompted', 'true'); }} />}
+      
       {showNotificationPrompt && (
-        <div className="fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-6">
+        <div className="fixed inset-0 z-[140] bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-6">
           <div className="bg-white rounded-[2.5rem] p-8 max-w-sm w-full text-center shadow-2xl animate-in zoom-in-95 duration-300">
-            <div className="w-16 h-16 bg-rose-50 text-rose-500 rounded-2xl flex items-center justify-center mx-auto mb-6">
-              <Bell size={32} className="animate-bounce" />
-            </div>
+            <div className="w-16 h-16 bg-rose-50 text-rose-500 rounded-2xl flex items-center justify-center mx-auto mb-6"><Bell size={32} /></div>
             <h3 className="text-xl font-black mb-2">Bật Nhắc nhở Kỷ luật?</h3>
             <p className="text-sm text-slate-500 mb-6 font-medium">Lumina sẽ nhắc má khi má quên thực hiện thói quen.</p>
-            {notifError && (
-              <div className="bg-amber-50 text-amber-700 p-4 rounded-xl text-[10px] font-bold uppercase mb-6 flex items-start gap-2 text-left">
-                <Info size={14} className="shrink-0" /> {notifError}
-              </div>
-            )}
             <div className="flex flex-col gap-3">
-              <button onClick={requestNotificationPermission} className="bg-rose-500 text-white font-black py-4 rounded-2xl text-xs uppercase tracking-widest shadow-lg active:scale-95 transition-all">Kích hoạt ngay</button>
+              <button onClick={requestNotificationPermission} className="bg-rose-500 text-white font-black py-4 rounded-2xl text-xs uppercase tracking-widest shadow-lg">Kích hoạt ngay</button>
               <button onClick={() => { setShowNotificationPrompt(false); localStorage.setItem('lumina_notif_prompted', 'true'); }} className="text-slate-400 font-black py-2 text-[10px] uppercase tracking-widest">Để sau</button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Sidebar */}
+      {/* Sidebar (Desktop) */}
       <aside className="hidden lg:flex w-20 flex-col items-center py-10 bg-white shrink-0 border-r border-slate-100 shadow-sm z-50">
         <div className="mb-14"><Zap size={28} className="text-rose-500 fill-rose-500" /></div>
         <nav className="flex-1 flex flex-col gap-6">
@@ -173,9 +217,7 @@ export default function App() {
           <NavBtn icon={<Layout size={22} />} active={currentView === 'day'} onClick={() => handleNavigate('day', new Date())} label="Ngày" />
           <NavBtn icon={<LayoutDashboard size={22} />} active={currentView === 'vision'} onClick={() => handleNavigate('vision')} label="Tầm nhìn" />
         </nav>
-        <button onClick={triggerRefresh} className="p-2 text-slate-300 hover:text-rose-500 transition-colors">
-          <RefreshCw size={20} className={refreshKey > 0 ? 'animate-spin' : ''} />
-        </button>
+        <button onClick={triggerRefresh} className="p-2 text-slate-300 hover:text-rose-500"><RefreshCw size={20} className={refreshKey > 0 ? 'animate-spin' : ''} /></button>
       </aside>
 
       {/* Main Container */}
@@ -184,7 +226,7 @@ export default function App() {
           <div className="flex items-center gap-4">
             <div className="lg:hidden text-rose-500"><Zap size={22} className="fill-rose-500" /></div>
             <div className="flex flex-col">
-              <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">PLANNER CHUYỂN GIAO</span>
+              <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">LUMINA PLANNER</span>
               <h1 className="text-sm font-bold flex items-center gap-2 capitalize">
                 {getTitle()}
                 {['day', 'month', 'week'].includes(currentView) && (

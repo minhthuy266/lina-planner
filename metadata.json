@@ -1,5 +1,8 @@
 {
   "name": "Lumina Planner",
   "description": "An aesthetic 2026 planner with daily, weekly, and monthly views, featuring an AI-powered Vision Board to manifest your goals.",
-  "requestFramePermissions": []
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
 }

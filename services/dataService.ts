@@ -5,7 +5,7 @@ import { Task, VisionItem, Habit, DayReflection } from '../types';
 export const dataService = {
   checkConfig() {
     if (!isSupabaseConfigured()) {
-      console.error("Cấu hình Supabase không khả dụng.");
+      console.warn("Lumina: Supabase chưa được cấu hình qua biến môi trường. Một số tính năng lưu trữ sẽ không hoạt động.");
       return false;
     }
     return true;

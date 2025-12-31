@@ -6,9 +6,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Lumina 2026 • Light Center</title>
     
+    <!-- PWA Meta Tags -->
     <link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Lumina">
+    
+    <!-- Apple Touch Icons -->
+    <link rel="apple-touch-icon" href="https://img.icons8.com/fluency/192/000000/calendar-external-link.png">
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,400;0,600;0,700;0,800;0,900;1,400;1,600&family=Lora:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
@@ -29,10 +34,9 @@
     <style>
         :root {
             --rose: #f43f5e;
-            --indigo: #4338ca;
-            --slate-50: #f8fafc;
             --slate-900: #0f172a;
-            --safe-bottom: env(safe-area-inset-bottom);
+            --sat: env(safe-area-inset-top);
+            --sab: env(safe-area-inset-bottom);
         }
 
         body {
@@ -45,33 +49,35 @@
             height: 100%;
             -webkit-font-smoothing: antialiased;
             touch-action: manipulation;
+            padding-top: var(--sat);
         }
 
-        .widget-shadow {
-            box-shadow: 0 10px 30px -10px rgba(15, 23, 42, 0.08);
-            border: 1px solid rgba(15, 23, 42, 0.05);
+        .no-select {
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
         }
-
-        .page-transition {
-            animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
 
         .mobile-nav-glass {
             background: rgba(255, 255, 255, 0.85);
             backdrop-filter: blur(20px);
             border-top: 1px solid rgba(15, 23, 42, 0.05);
-            padding-bottom: calc(0.8rem + var(--safe-bottom));
+            padding-bottom: calc(0.8rem + var(--sab));
         }
 
-        input:focus { outline: none; }
+        .ios-prompt-animation {
+            animation: slideUpPrompt 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes slideUpPrompt {
+            from { transform: translateY(100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        /* Tối ưu hóa scroll cho mobile */
+        .custom-scrollbar {
+            -webkit-overflow-scrolling: touch;
+        }
     </style>
 <script type="importmap">
 {
@@ -90,9 +96,8 @@
 }
 </script>
 </head>
-<body>
+<body class="no-select">
     <div id="root"></div>
-    <!-- Thêm dòng này để công cụ build nhận diện được file code chính -->
     <script type="module" src="./index.tsx"></script>
 </body>
 </html>
