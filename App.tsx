@@ -65,7 +65,7 @@ const NavBtn: React.FC<{ icon: React.ReactNode; active: boolean; onClick: () => 
 const MobileTab: React.FC<{ icon: React.ReactNode; active: boolean; onClick: () => void }> = ({ icon, active, onClick }) => (
   <button 
     onClick={onClick} 
-    className={`flex-1 flex flex-col items-center justify-center h-12 transition-all ${active ? 'text-rose-500' : 'text-slate-400'}`}
+    className={`flex-1 flex flex-col items-center justify-center h-[50px] transition-all ${active ? 'text-rose-500' : 'text-slate-400'}`}
   >
     <div className="relative">
       {React.isValidElement(icon) ? React.cloneElement(icon as React.ReactElement<any>, { size: 24 }) : icon}
@@ -163,8 +163,8 @@ export default function App() {
         </header>
 
         <main className="flex-1 relative overflow-hidden">
-          {/* Căn chỉnh padding bottom khít rịt: đúng 48px của thanh điều hướng */}
-          <div className="absolute inset-0 overflow-y-auto custom-scrollbar p-4 lg:p-10 pb-[calc(48px+env(safe-area-inset-bottom))] lg:pb-10">
+          {/* CRITICAL FIX: pt-4 px-4 thay vì p-4 để tránh bị double padding bottom */}
+          <div className="absolute inset-0 overflow-y-auto custom-scrollbar pt-4 px-4 lg:p-10 pb-[calc(50px+env(safe-area-inset-bottom))] lg:pb-10">
             <div className="max-w-6xl mx-auto" key={refreshKey}>
               {currentView === 'dashboard' && <Dashboard onNavigate={handleNavigate} onUpdate={triggerRefresh} />}
               {currentView === 'year' && <YearView onSelectDate={(d) => { setCurrentDate(d); setCurrentView('month'); }} refreshKey={refreshKey} />}
@@ -176,7 +176,7 @@ export default function App() {
           </div>
         </main>
 
-        <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 mobile-nav-glass">
+        <div className="lg:hidden mobile-nav-glass z-50">
           <nav className="flex items-center justify-around w-full px-2">
             <MobileTab icon={<Home />} active={currentView === 'dashboard'} onClick={() => handleNavigate('dashboard')} />
             <MobileTab icon={<Calendar />} active={currentView === 'month'} onClick={() => handleNavigate('month')} />

@@ -63,19 +63,24 @@
             user-select: none;
         }
 
-        /* Mobile Tab Bar chuẩn iOS - Chiều cao content 48px, căn giữa icon */
+        /* Mobile Tab Bar chuẩn iOS - Không dư không thiếu */
         .mobile-nav-glass {
             background: rgba(255, 255, 255, 0.85);
             backdrop-filter: saturate(180%) blur(20px);
             -webkit-backdrop-filter: saturate(180%) blur(20px);
             border-top: 0.5px solid rgba(0, 0, 0, 0.1);
-            height: calc(48px + var(--sab));
+            /* Chiều cao tổng = 50px nội dung + safe area */
+            height: calc(50px + var(--sab));
             padding-bottom: var(--sab);
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
             display: flex;
             align-items: center;
         }
 
-        /* Safe Area cho Header - Cân bằng 44px */
+        /* Safe Area cho Header */
         header {
             padding-top: var(--sat);
             height: calc(var(--sat) + 44px);
