@@ -65,11 +65,11 @@ const NavBtn: React.FC<{ icon: React.ReactNode; active: boolean; onClick: () => 
 const MobileTab: React.FC<{ icon: React.ReactNode; active: boolean; onClick: () => void }> = ({ icon, active, onClick }) => (
   <button 
     onClick={onClick} 
-    className={`flex-1 flex flex-col items-center justify-center h-[50px] transition-all ${active ? 'text-rose-500' : 'text-slate-400'}`}
+    className={`flex-1 flex flex-col items-center justify-center h-12 transition-all ${active ? 'text-rose-500' : 'text-slate-400'}`}
   >
     <div className="relative">
       {React.isValidElement(icon) ? React.cloneElement(icon as React.ReactElement<any>, { size: 24 }) : icon}
-      {active && <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-1 h-1 bg-rose-500 rounded-full"></div>}
+      {active && <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-1 h-1 bg-rose-500 rounded-full"></div>}
     </div>
   </button>
 );
@@ -132,7 +132,6 @@ export default function App() {
     <div className="flex h-full w-full bg-[#fcfcfd] text-slate-900 overflow-hidden flex-col lg:flex-row">
       {showInstallPrompt && <IOSInstallPrompt onClose={() => { setShowInstallPrompt(false); localStorage.setItem('lumina_install_prompted', 'true'); }} />}
       
-      {/* Sidebar (Desktop) */}
       <aside className="hidden lg:flex w-20 flex-col items-center py-10 bg-white border-r border-slate-100 z-50">
         <div className="mb-14"><Zap size={28} className="text-rose-500 fill-rose-500" /></div>
         <nav className="flex-1 flex flex-col gap-6">
@@ -145,7 +144,6 @@ export default function App() {
         <button onClick={triggerRefresh} className="p-2 text-slate-300"><RefreshCw size={20} /></button>
       </aside>
 
-      {/* Main Container */}
       <div className="flex-1 flex flex-col min-w-0 h-full relative">
         <header className="bg-white/80 backdrop-blur-xl border-b border-slate-100 flex items-center justify-between px-5 shrink-0 z-40">
           <div className="flex items-center gap-3">
@@ -165,8 +163,8 @@ export default function App() {
         </header>
 
         <main className="flex-1 relative overflow-hidden">
-          {/* Căn chỉnh padding bottom chính xác: 50px của Tab Bar + 8px hở nhẹ */}
-          <div className="absolute inset-0 overflow-y-auto custom-scrollbar p-4 lg:p-10 pb-[calc(50px+env(safe-area-inset-bottom)+8px)] lg:pb-10">
+          {/* Căn chỉnh padding bottom khít rịt: đúng 48px của thanh điều hướng */}
+          <div className="absolute inset-0 overflow-y-auto custom-scrollbar p-4 lg:p-10 pb-[calc(48px+env(safe-area-inset-bottom))] lg:pb-10">
             <div className="max-w-6xl mx-auto" key={refreshKey}>
               {currentView === 'dashboard' && <Dashboard onNavigate={handleNavigate} onUpdate={triggerRefresh} />}
               {currentView === 'year' && <YearView onSelectDate={(d) => { setCurrentDate(d); setCurrentView('month'); }} refreshKey={refreshKey} />}
@@ -178,9 +176,8 @@ export default function App() {
           </div>
         </main>
 
-        {/* Mobile Tab Bar - Thiết kế lại để icon không bị đẩy lên quá cao */}
         <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 mobile-nav-glass">
-          <nav className="flex items-start justify-around w-full px-2 h-full">
+          <nav className="flex items-center justify-around w-full px-2">
             <MobileTab icon={<Home />} active={currentView === 'dashboard'} onClick={() => handleNavigate('dashboard')} />
             <MobileTab icon={<Calendar />} active={currentView === 'month'} onClick={() => handleNavigate('month')} />
             <MobileTab icon={<Columns />} active={currentView === 'week'} onClick={() => handleNavigate('week')} />
