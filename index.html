@@ -39,23 +39,32 @@
             --sab: env(safe-area-inset-bottom);
         }
 
-        html, body {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            /* Sử dụng dvh để luôn chuẩn xác trên iOS PWA */
-            height: 100dvh;
-            overflow: hidden;
+        /* KHẮC PHỤC LỖI CHIỀU CAO IOS PWA */
+        html {
+            height: -webkit-fill-available;
             background-color: #fcfcfd;
         }
 
         body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            min-height: 100vh;
+            min-height: -webkit-fill-available;
+            overflow: hidden; /* Ngăn scroll toàn trang gây hở đáy */
             font-family: 'Be Vietnam Pro', sans-serif;
             color: var(--slate-900);
-            position: fixed;
-            inset: 0;
+            background-color: #fcfcfd;
             -webkit-font-smoothing: antialiased;
             touch-action: manipulation;
+        }
+
+        #root {
+            height: 100%;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
         }
 
         .no-select {
@@ -64,14 +73,13 @@
             user-select: none;
         }
 
-        /* Mobile Tab Bar chuẩn iOS - Khít rịt không kẽ hở */
+        /* Mobile Tab Bar chuẩn iOS - Ép sát đáy tuyệt đối */
         .mobile-nav-glass {
-            background: rgba(255, 255, 255, 0.85);
+            background: rgba(255, 255, 255, 0.9);
             backdrop-filter: saturate(180%) blur(20px);
             -webkit-backdrop-filter: saturate(180%) blur(20px);
             border-top: 0.5px solid rgba(0, 0, 0, 0.1);
-            /* Chiều cao cố định 50px cho icon + safe area bottom */
-            height: calc(50px + var(--sab));
+            height: calc(55px + var(--sab));
             padding-bottom: var(--sab);
             position: fixed;
             bottom: 0;
@@ -79,25 +87,23 @@
             right: 0;
             display: flex;
             align-items: center;
+            z-index: 100;
         }
 
         header {
             padding-top: var(--sat);
-            height: calc(var(--sat) + 44px);
+            height: calc(var(--sat) + 50px);
+            background: white;
+            z-index: 90;
         }
 
         .custom-scrollbar {
             -webkit-overflow-scrolling: touch;
         }
 
-        #root {
-            height: 100dvh;
-            display: flex;
-            flex-direction: column;
-        }
-
         * {
             -webkit-tap-highlight-color: transparent;
+            box-sizing: border-box;
         }
     </style>
 <script type="importmap">
