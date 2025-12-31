@@ -40,7 +40,7 @@ const YearView: React.FC<YearViewProps> = ({ onSelectDate, refreshKey }) => {
   }
 
   return (
-    <div className="space-y-12 animate-in fade-in slide-in-from-bottom-6 duration-700 pb-20">
+    <div className="space-y-12 animate-in fade-in slide-in-from-bottom-6 duration-700">
       <header className="flex items-center justify-between">
         <div>
           <h2 className="text-4xl font-black text-slate-950 tracking-tighter uppercase">2026 Roadmap</h2>

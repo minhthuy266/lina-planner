@@ -128,7 +128,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate, onUpdate }) => {
   );
 
   return (
-    <div className="space-y-6 md:space-y-10 animate-in fade-in duration-700 pb-20">
+    <div className="space-y-6 md:space-y-10 animate-in fade-in duration-700">
       {/* AI Greeting Header */}
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 md:p-8 rounded-[2.5rem] widget-shadow relative overflow-hidden">
         <div className="absolute top-0 right-0 p-4 opacity-5">

@@ -63,16 +63,15 @@
             user-select: none;
         }
 
-        /* Mobile Tab Bar chuẩn iOS - Ép chiều cao xuống 49px */
+        /* Mobile Tab Bar chuẩn iOS - Cố định icon ở phần trên, phần lẹm bên dưới chỉ đổ màu */
         .mobile-nav-glass {
             background: rgba(255, 255, 255, 0.8);
             backdrop-filter: saturate(180%) blur(20px);
             -webkit-backdrop-filter: saturate(180%) blur(20px);
             border-top: 0.5px solid rgba(0, 0, 0, 0.1);
-            padding-bottom: var(--sab);
-            height: calc(49px + var(--sab));
+            height: calc(50px + var(--sab));
             display: flex;
-            align-items: center;
+            align-items: flex-start;
         }
 
         /* Safe Area cho Header - Ép xuống 44px */

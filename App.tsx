@@ -65,11 +65,11 @@ const NavBtn: React.FC<{ icon: React.ReactNode; active: boolean; onClick: () => 
 const MobileTab: React.FC<{ icon: React.ReactNode; active: boolean; onClick: () => void }> = ({ icon, active, onClick }) => (
   <button 
     onClick={onClick} 
-    className={`flex-1 flex flex-col items-center justify-center h-full transition-all ${active ? 'text-rose-500' : 'text-slate-400'}`}
+    className={`flex-1 flex flex-col items-center justify-center h-[50px] transition-all ${active ? 'text-rose-500' : 'text-slate-400'}`}
   >
     <div className="relative">
-      {React.isValidElement(icon) ? React.cloneElement(icon as React.ReactElement<any>, { size: 22 }) : icon}
-      {active && <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-1 h-1 bg-rose-500 rounded-full"></div>}
+      {React.isValidElement(icon) ? React.cloneElement(icon as React.ReactElement<any>, { size: 24 }) : icon}
+      {active && <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-1 h-1 bg-rose-500 rounded-full"></div>}
     </div>
   </button>
 );
@@ -165,8 +165,8 @@ export default function App() {
         </header>
 
         <main className="flex-1 relative overflow-hidden">
-          {/* pb-[calc(49px+env(safe-area-inset-bottom)+8px)]: Ép sát padding cho vừa khít footer 49px */}
-          <div className="absolute inset-0 overflow-y-auto custom-scrollbar p-4 lg:p-10 pb-[calc(49px+env(safe-area-inset-bottom)+8px)] lg:pb-10">
+          {/* Căn chỉnh padding bottom chính xác: 50px của Tab Bar + 8px hở nhẹ */}
+          <div className="absolute inset-0 overflow-y-auto custom-scrollbar p-4 lg:p-10 pb-[calc(50px+env(safe-area-inset-bottom)+8px)] lg:pb-10">
             <div className="max-w-6xl mx-auto" key={refreshKey}>
               {currentView === 'dashboard' && <Dashboard onNavigate={handleNavigate} onUpdate={triggerRefresh} />}
               {currentView === 'year' && <YearView onSelectDate={(d) => { setCurrentDate(d); setCurrentView('month'); }} refreshKey={refreshKey} />}
@@ -178,9 +178,9 @@ export default function App() {
           </div>
         </main>
 
-        {/* Mobile Tab Bar - Ép cao đúng 49px + Safe Area */}
+        {/* Mobile Tab Bar - Thiết kế lại để icon không bị đẩy lên quá cao */}
         <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 mobile-nav-glass">
-          <nav className="flex items-center justify-around w-full px-2 h-full">
+          <nav className="flex items-start justify-around w-full px-2 h-full">
             <MobileTab icon={<Home />} active={currentView === 'dashboard'} onClick={() => handleNavigate('dashboard')} />
             <MobileTab icon={<Calendar />} active={currentView === 'month'} onClick={() => handleNavigate('month')} />
             <MobileTab icon={<Columns />} active={currentView === 'week'} onClick={() => handleNavigate('week')} />

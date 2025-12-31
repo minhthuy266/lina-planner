@@ -164,7 +164,7 @@ const DayView: React.FC<DayViewProps> = ({ date, onUpdate, refreshKey }) => {
   );
 
   return (
-    <div className="flex flex-col gap-8 pb-10">
+    <div className="flex flex-col gap-8">
       <div className="flex flex-col md:flex-row items-start md:items-end justify-between px-2 gap-4">
          <div>
             <div className="flex items-center gap-2 mb-1">
