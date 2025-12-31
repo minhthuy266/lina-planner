@@ -129,7 +129,7 @@ export default function App() {
   };
 
   return (
-    <div className="flex h-full w-full bg-[#fcfcfd] text-slate-900 overflow-hidden flex-col lg:flex-row">
+    <div className="flex h-[100dvh] w-full bg-[#fcfcfd] text-slate-900 overflow-hidden flex-col lg:flex-row">
       {showInstallPrompt && <IOSInstallPrompt onClose={() => { setShowInstallPrompt(false); localStorage.setItem('lumina_install_prompted', 'true'); }} />}
       
       <aside className="hidden lg:flex w-20 flex-col items-center py-10 bg-white border-r border-slate-100 z-50">
@@ -163,7 +163,7 @@ export default function App() {
         </header>
 
         <main className="flex-1 relative overflow-hidden">
-          {/* CRITICAL FIX: pt-4 px-4 thay vì p-4 để tránh bị double padding bottom */}
+          {/* SỬ DỤNG dvh ĐỂ TRÁNH KHOẢNG TRỐNG KHI PWA MỞ LÊN */}
           <div className="absolute inset-0 overflow-y-auto custom-scrollbar pt-4 px-4 lg:p-10 pb-[calc(50px+env(safe-area-inset-bottom))] lg:pb-10">
             <div className="max-w-6xl mx-auto" key={refreshKey}>
               {currentView === 'dashboard' && <Dashboard onNavigate={handleNavigate} onUpdate={triggerRefresh} />}
@@ -176,6 +176,7 @@ export default function App() {
           </div>
         </main>
 
+        {/* BOTTOM NAV CHUẨN PWA STANDALONE */}
         <div className="lg:hidden mobile-nav-glass z-50">
           <nav className="flex items-center justify-around w-full px-2">
             <MobileTab icon={<Home />} active={currentView === 'dashboard'} onClick={() => handleNavigate('dashboard')} />
