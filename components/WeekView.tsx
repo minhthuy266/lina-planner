@@ -163,9 +163,9 @@ const WeekView: React.FC<WeekViewProps> = ({ date, onSelectDate, onUpdate, refre
                   </button>
 
                   {reflection?.focus && (
-                    <div className="bg-amber-50/50 p-2 rounded-lg border border-amber-100 flex items-start gap-1.5">
+                    <div className="bg-amber-50/50 p-2 rounded-lg border border-amber-100 flex items-start gap-1.5 min-h-[40px]">
                        <Target size={10} className="text-amber-500 mt-0.5 shrink-0" />
-                       <span className="text-[9px] font-bold text-amber-900 leading-tight line-clamp-2 uppercase italic">{reflection.focus}</span>
+                       <span className="text-[9px] font-bold text-amber-900 leading-tight break-words line-clamp-2 uppercase italic">{reflection.focus}</span>
                     </div>
                   )}
                 </div>
@@ -211,29 +211,32 @@ const WeekView: React.FC<WeekViewProps> = ({ date, onSelectDate, onUpdate, refre
                                     : 'bg-white border-rose-100 text-slate-800'
                               }`}
                             >
-                              <div className="flex items-center justify-between mb-1">
-                                 <span className="opacity-70">{task.startTime}</span>
+                              <div className="flex items-center justify-between mb-1.5 shrink-0">
+                                 <span className="opacity-70 text-[8px]">{task.startTime}</span>
                                  <div className="flex items-center gap-1">
                                     <button onClick={(e) => handleDeleteTask(e, task.id)} className="opacity-0 group-hover/item:opacity-100 hover:text-rose-400 p-0.5"><Trash2 size={10}/></button>
                                     {task.completed && <Check size={10} />}
                                  </div>
                               </div>
-                              <div className={`truncate ${task.completed ? 'line-through' : ''}`}>
+                              <div className={`break-words line-clamp-3 ${task.completed ? 'line-through' : ''}`}>
                                 {task.title}
                               </div>
                             </div>
                           ))
                         ) : isCellEditing ? (
                           <div className="flex flex-col gap-2 p-1 bg-white rounded-xl shadow-xl z-10 border border-rose-200">
-                            <input 
-                              ref={inputRef}
-                              type="text"
-                              className="w-full text-[10px] font-bold p-2 outline-none"
-                              placeholder="Title..."
+                            <textarea 
+                              ref={inputRef as any}
+                              className="w-full text-[10px] font-bold p-2 outline-none resize-none bg-transparent"
+                              placeholder="Nhiệm vụ..."
+                              rows={2}
                               value={quickTitle}
                               onChange={(e) => setQuickTitle(e.target.value)}
                               onKeyDown={(e) => {
-                                if (e.key === 'Enter') handleSaveQuickTask();
+                                if (e.key === 'Enter' && !e.shiftKey) {
+                                  e.preventDefault();
+                                  handleSaveQuickTask();
+                                }
                                 if (e.key === 'Escape') setActiveCell(null);
                               }}
                             />

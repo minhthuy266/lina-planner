@@ -13,13 +13,12 @@ import {
   Smile,
   Frown,
   Meh,
-  Wind,
   Battery,
   Settings2,
   X,
   BookOpen
 } from 'lucide-react';
-import { Task, Habit, VisionItem, DayReflection } from '../types';
+import { Task, Habit, DayReflection } from '../types';
 import { dataService } from '../services/dataService';
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale/vi';
@@ -77,7 +76,6 @@ const DayView: React.FC<DayViewProps> = ({ date, onUpdate, refreshKey }) => {
         journal: ''
       });
     }
-    
     setIsLoading(false);
   };
 
@@ -92,13 +90,8 @@ const DayView: React.FC<DayViewProps> = ({ date, onUpdate, refreshKey }) => {
     if (onUpdate) onUpdate();
   };
 
-  const updateReflectionField = (updates: Partial<DayReflection>) => {
-    const newRef = { ...reflection, ...updates };
-    setReflection(newRef);
-    // Lưu ngay lập tức cho các trường nhanh, trừ journal và focus để tránh spam API
-    if (updates.mood || updates.energyLevel || updates.wakeUpTime === reflection.wakeUpTime) {
-       // logic debounce có thể thêm ở đây nếu cần
-    }
+  const updateReflectionLocally = (updates: Partial<DayReflection>) => {
+    setReflection(prev => ({ ...prev, ...updates }));
   };
 
   const handleToggleHabit = async (id: string) => {
@@ -152,17 +145,26 @@ const DayView: React.FC<DayViewProps> = ({ date, onUpdate, refreshKey }) => {
     if (onUpdate) onUpdate();
   };
 
+  const handleUpdateTaskTitle = async (id: string, newTitle: string) => {
+    setTasks(prev => prev.map(t => t.id === id ? { ...t, title: newTitle } : t));
+    await dataService.updateTask(id, { title: newTitle });
+    if (onUpdate) onUpdate();
+  };
+
   const handleDeleteTask = async (id: string) => {
     setTasks(prev => prev.filter(t => t.id !== id));
     await dataService.deleteTask(id);
     if (onUpdate) onUpdate();
   };
 
-  if (isLoading) return null;
+  if (isLoading) return (
+    <div className="h-96 flex items-center justify-center">
+      <div className="w-10 h-10 border-4 border-rose-100 border-t-rose-600 rounded-full animate-spin"></div>
+    </div>
+  );
 
   return (
     <div className="flex flex-col gap-8 pb-10">
-      {/* Header */}
       <div className="flex flex-col md:flex-row items-start md:items-end justify-between px-2 gap-4">
          <div>
             <div className="flex items-center gap-2 mb-1">
@@ -184,9 +186,9 @@ const DayView: React.FC<DayViewProps> = ({ date, onUpdate, refreshKey }) => {
                <span className="text-[8px] font-black text-slate-400 uppercase mb-1">Thức dậy</span>
                <input 
                   type="text" 
-                  className="text-xl font-black w-16 text-center bg-transparent outline-none focus:text-rose-500"
+                  className="text-xl font-black w-16 text-center bg-transparent outline-none focus:text-rose-500 border-b border-transparent focus:border-rose-100"
                   value={reflection.wakeUpTime}
-                  onChange={(e) => updateReflectionField({ wakeUpTime: e.target.value })}
+                  onChange={(e) => updateReflectionLocally({ wakeUpTime: e.target.value })}
                   onBlur={() => saveReflectionToDB(reflection)}
                />
             </div>
@@ -194,9 +196,7 @@ const DayView: React.FC<DayViewProps> = ({ date, onUpdate, refreshKey }) => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* Left Column */}
         <div className="lg:col-span-4 space-y-6">
-           {/* Morning Intention */}
            <section className="bg-indigo-600 rounded-[2.5rem] p-6 text-white shadow-xl shadow-indigo-100 relative overflow-hidden">
               <Sun className="absolute -right-4 -top-4 w-24 h-24 text-white/10" />
               <div className="relative z-10">
@@ -205,22 +205,22 @@ const DayView: React.FC<DayViewProps> = ({ date, onUpdate, refreshKey }) => {
                  </h3>
                  <div className="space-y-4">
                     <div>
-                       <label className="text-[9px] font-black uppercase text-white/60 mb-1 block">Tiêu điểm hôm nay (The One Thing)</label>
+                       <label className="text-[9px] font-black uppercase text-white/60 mb-1 block">Tiêu điểm hôm nay</label>
                        <input 
                          type="text"
                          value={reflection.focus}
-                         onChange={(e) => updateReflectionField({ focus: e.target.value })}
+                         onChange={(e) => updateReflectionLocally({ focus: e.target.value })}
                          onBlur={() => saveReflectionToDB(reflection)}
                          placeholder="Một việc quan trọng nhất..."
                          className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-sm font-bold placeholder:text-white/40 outline-none focus:bg-white/20 transition-all"
                        />
                     </div>
                     <div>
-                       <label className="text-[9px] font-black uppercase text-white/60 mb-1 block">Năng lượng đầu ngày</label>
+                       <label className="text-[9px] font-black uppercase text-white/60 mb-1 block">Năng lượng ({reflection.energyLevel}/10)</label>
                        <input 
                          type="range" min="1" max="10" 
                          value={reflection.energyLevel}
-                         onChange={(e) => updateReflectionField({ energyLevel: parseInt(e.target.value) })}
+                         onChange={(e) => updateReflectionLocally({ energyLevel: parseInt(e.target.value) })}
                          onMouseUp={() => saveReflectionToDB(reflection)}
                          className="w-full h-1.5 bg-white/20 rounded-lg appearance-none cursor-pointer accent-white"
                        />
@@ -229,7 +229,6 @@ const DayView: React.FC<DayViewProps> = ({ date, onUpdate, refreshKey }) => {
               </div>
            </section>
 
-           {/* Discipline Core */}
            <div className="bg-white widget-shadow rounded-[2.5rem] p-6">
               <div className="flex items-center justify-between mb-6 border-b border-slate-50 pb-3">
                  <div className="flex items-center gap-2">
@@ -284,7 +283,6 @@ const DayView: React.FC<DayViewProps> = ({ date, onUpdate, refreshKey }) => {
               </div>
            </div>
 
-           {/* Evening Reflection */}
            <section className="bg-slate-900 rounded-[2.5rem] p-6 text-white shadow-xl relative overflow-hidden">
               <Moon className="absolute -right-4 -top-4 w-24 h-24 text-white/5" />
               <div className="relative z-10">
@@ -301,7 +299,7 @@ const DayView: React.FC<DayViewProps> = ({ date, onUpdate, refreshKey }) => {
                         onChange={(e) => {
                           const newGrat = [...reflection.gratitude];
                           newGrat[idx] = e.target.value;
-                          updateReflectionField({ gratitude: newGrat });
+                          updateReflectionLocally({ gratitude: newGrat });
                         }}
                         onBlur={() => saveReflectionToDB(reflection)}
                         placeholder={`${idx + 1}. Tôi biết ơn vì...`}
@@ -309,7 +307,7 @@ const DayView: React.FC<DayViewProps> = ({ date, onUpdate, refreshKey }) => {
                       />
                     ))}
                     <div className="pt-2 flex justify-between items-center">
-                       <span className="text-[9px] font-black uppercase text-white/40">Mood Check</span>
+                       <span className="text-[9px] font-black uppercase text-white/40">Tâm trạng</span>
                        <div className="flex gap-2">
                           {[
                             { icon: <Frown size={16}/>, key: 'Sad' },
@@ -320,8 +318,9 @@ const DayView: React.FC<DayViewProps> = ({ date, onUpdate, refreshKey }) => {
                             <button 
                               key={m.key}
                               onClick={() => {
-                                updateReflectionField({ mood: m.key });
-                                saveReflectionToDB({ ...reflection, mood: m.key });
+                                const updated = { ...reflection, mood: m.key };
+                                setReflection(updated);
+                                saveReflectionToDB(updated);
                               }}
                               className={`p-2 rounded-lg transition-all ${reflection.mood === m.key ? 'bg-rose-500 text-white' : 'text-white/30 hover:text-white'}`}
                             >
@@ -335,7 +334,6 @@ const DayView: React.FC<DayViewProps> = ({ date, onUpdate, refreshKey }) => {
            </section>
         </div>
 
-        {/* Right Column */}
         <div className="lg:col-span-8 flex flex-col gap-6">
           <div className="bg-white widget-shadow rounded-[2.5rem] overflow-hidden flex flex-col min-h-[600px]">
             <div className="p-8 border-b border-slate-50 flex items-center justify-between shrink-0 bg-slate-50/50">
@@ -405,7 +403,7 @@ const DayView: React.FC<DayViewProps> = ({ date, onUpdate, refreshKey }) => {
                                        const val = e.target.value;
                                        setTasks(prev => prev.map(t => t.id === task.id ? {...t, title: val} : t));
                                     }}
-                                    onBlur={(e) => dataService.updateTask(task.id, {title: e.target.value})}
+                                    onBlur={(e) => handleUpdateTaskTitle(task.id, e.target.value)}
                                   />
                                 </div>
                                 <div className="flex items-center gap-2 opacity-0 group-hover/task:opacity-100 transition-all">
@@ -439,7 +437,6 @@ const DayView: React.FC<DayViewProps> = ({ date, onUpdate, refreshKey }) => {
                   })}
                </div>
 
-               {/* Journaling Area */}
                <div className="mt-12 bg-slate-50/50 rounded-[2.5rem] p-8 border border-slate-100">
                   <div className="flex items-center gap-3 mb-4">
                     <div className="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center">
@@ -451,7 +448,7 @@ const DayView: React.FC<DayViewProps> = ({ date, onUpdate, refreshKey }) => {
                     className="w-full h-40 bg-transparent text-sm font-medium leading-relaxed outline-none resize-none placeholder:text-slate-300 text-slate-700"
                     placeholder="Hôm nay má cảm thấy thế nào? Có bài học nào đáng nhớ không?"
                     value={reflection.journal || ''}
-                    onChange={(e) => updateReflectionField({ journal: e.target.value })}
+                    onChange={(e) => updateReflectionLocally({ journal: e.target.value })}
                     onBlur={() => saveReflectionToDB(reflection)}
                   />
                </div>

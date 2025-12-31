@@ -11,7 +11,6 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Đổi font sang Be Vietnam Pro (Sans) và Lora (Serif) hỗ trợ tiếng Việt cực tốt -->
     <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,400;0,600;0,700;0,800;0,900;1,400;1,600&family=Lora:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
     
     <script>
@@ -48,13 +47,11 @@
             touch-action: manipulation;
         }
 
-        /* Pop Shadows */
         .widget-shadow {
             box-shadow: 0 10px 30px -10px rgba(15, 23, 42, 0.08);
             border: 1px solid rgba(15, 23, 42, 0.05);
         }
 
-        /* App-like Transitions */
         .page-transition {
             animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
@@ -64,21 +61,14 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Compact Scrollbar */
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
 
-        /* Mobile Nav Glass */
         .mobile-nav-glass {
             background: rgba(255, 255, 255, 0.85);
             backdrop-filter: blur(20px);
             border-top: 1px solid rgba(15, 23, 42, 0.05);
             padding-bottom: calc(0.8rem + var(--safe-bottom));
-        }
-
-        .compact-row {
-            height: 44px;
-            border-bottom: 1px solid rgba(15, 23, 42, 0.03);
         }
 
         input:focus { outline: none; }
@@ -89,16 +79,20 @@
     "react": "https://esm.sh/react@^19.2.3",
     "react/": "https://esm.sh/react@^19.2.3/",
     "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
-    "date-fns": "https://esm.sh/date-fns@^4.1.0",
-    "lucide-react": "https://esm.sh/lucide-react@^0.562.0",
     "@google/genai": "https://esm.sh/@google/genai@^1.34.0",
-    "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@^2.45.4",
-    "date-fns/": "https://esm.sh/date-fns@^4.1.0/"
+    "date-fns": "https://esm.sh/date-fns@^4.1.0",
+    "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@^2.89.0",
+    "lucide-react": "https://esm.sh/lucide-react@^0.562.0",
+    "vite": "https://esm.sh/vite@^7.3.0",
+    "date-fns/": "https://esm.sh/date-fns@^4.1.0/",
+    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2"
   }
 }
 </script>
 </head>
 <body>
     <div id="root"></div>
+    <!-- Thêm dòng này để công cụ build nhận diện được file code chính -->
+    <script type="module" src="./index.tsx"></script>
 </body>
 </html>

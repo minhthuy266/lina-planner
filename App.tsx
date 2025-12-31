@@ -13,7 +13,8 @@ import {
   Zap,
   Bell,
   AlertTriangle,
-  Info
+  Info,
+  Columns
 } from 'lucide-react';
 import { ViewType } from './types';
 import Dashboard from './components/Dashboard';
@@ -26,14 +27,38 @@ import { dataService } from './services/dataService';
 import { format, addMonths } from 'date-fns';
 import { vi } from 'date-fns/locale/vi';
 
-const App: React.FC = () => {
+const NavBtn: React.FC<{ icon: React.ReactNode; active: boolean; onClick: () => void; label: string }> = ({ icon, active, onClick, label }) => (
+  <button 
+    onClick={onClick} 
+    title={label}
+    className={`p-3 rounded-2xl transition-all relative group ${active ? 'bg-rose-500 text-white shadow-lg shadow-rose-200' : 'text-slate-400 hover:text-slate-900 hover:bg-slate-50'}`}
+  >
+    {icon}
+    <span className="absolute left-full ml-4 px-2 py-1 bg-slate-900 text-white text-[10px] font-black rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-[100] uppercase tracking-widest">
+      {label}
+    </span>
+  </button>
+);
+
+const MobileTab: React.FC<{ icon: React.ReactNode; active: boolean; onClick: () => void }> = ({ icon, active, onClick }) => (
+  <button onClick={onClick} className={`p-3 rounded-2xl transition-all ${active ? 'text-rose-500 bg-rose-50' : 'text-slate-400'}`}>{icon}</button>
+);
+
+export default function App() {
   const [currentView, setCurrentView] = useState<ViewType>('dashboard');
-  const [currentDate, setCurrentDate] = useState(new Date(2026, 0, 1));
+  const [currentDate, setCurrentDate] = useState(new Date());
   const [refreshKey, setRefreshKey] = useState(0);
   const [showNotificationPrompt, setShowNotificationPrompt] = useState(false);
   const [notifError, setNotifError] = useState<string | null>(null);
 
   const triggerRefresh = () => setRefreshKey(prev => prev + 1);
+
+  const handleNavigate = (view: ViewType, date?: Date) => {
+    if (date) {
+      setCurrentDate(new Date(date));
+    }
+    setCurrentView(view);
+  };
 
   useEffect(() => {
     const hasPrompted = localStorage.getItem('lumina_notif_prompted');
@@ -45,13 +70,13 @@ const App: React.FC = () => {
         checkDiscipline();
       }
     }
-  }, [refreshKey]); // Kiểm tra kỷ luật mỗi khi có cập nhật
+  }, [refreshKey]);
 
   const checkDiscipline = async () => {
     if (!("Notification" in window) || Notification.permission !== "granted") return;
     const habits = await dataService.getHabits();
-    const today = format(new Date(), 'yyyy-MM-dd');
-    const undoneHabits = habits.filter(h => h.lastCompleted !== today);
+    const todayStr = format(new Date(), 'yyyy-MM-dd');
+    const undoneHabits = habits.filter(h => h.lastCompleted !== todayStr);
     if (undoneHabits.length > 0) {
       try {
         new Notification("Lumina Discipline", {
@@ -85,6 +110,13 @@ const App: React.FC = () => {
   const navigateDate = (direction: 'prev' | 'next') => {
     if (currentView === 'month') {
       setCurrentDate(prev => direction === 'next' ? addMonths(prev, 1) : addMonths(prev, -1));
+    } else if (currentView === 'week') {
+      const delta = direction === 'next' ? 7 : -7;
+      setCurrentDate(prev => {
+        const d = new Date(prev);
+        d.setDate(d.getDate() + delta);
+        return d;
+      });
     } else {
       const delta = direction === 'next' ? 1 : -1;
       setCurrentDate(prev => {
@@ -97,13 +129,13 @@ const App: React.FC = () => {
 
   const getTitle = () => {
     switch(currentView) {
-      case 'dashboard': return 'Tổng quan';
+      case 'dashboard': return `Tổng quan hôm nay`;
       case 'year': return 'Lộ trình năm 2026';
       case 'month': return format(currentDate, 'MMMM, yyyy', { locale: vi });
-      case 'week': return 'Kế hoạch tuần';
-      case 'day': return format(currentDate, 'eeee, dd/MM', { locale: vi });
+      case 'week': return `Tuần ${format(currentDate, 'ww')} • ${format(currentDate, 'yyyy')}`;
+      case 'day': return format(currentDate, 'eeee, dd/MM/yyyy', { locale: vi });
       case 'vision': return 'Bảng tầm nhìn';
-      default: return 'Lumina 2026';
+      default: return 'Lumina Planner';
     }
   };
 
@@ -133,12 +165,13 @@ const App: React.FC = () => {
       {/* Sidebar */}
       <aside className="hidden lg:flex w-20 flex-col items-center py-10 bg-white shrink-0 border-r border-slate-100 shadow-sm z-50">
         <div className="mb-14"><Zap size={28} className="text-rose-500 fill-rose-500" /></div>
-        <nav className="flex-1 flex flex-col gap-8">
-          <NavBtn icon={<Home size={22} />} active={currentView === 'dashboard'} onClick={() => setCurrentView('dashboard')} label="Nhà" />
-          <NavBtn icon={<Layers size={22} />} active={currentView === 'year'} onClick={() => setCurrentView('year')} label="Năm" />
-          <NavBtn icon={<Calendar size={22} />} active={currentView === 'month'} onClick={() => setCurrentView('month')} label="Tháng" />
-          <NavBtn icon={<Layout size={22} />} active={currentView === 'week'} onClick={() => setCurrentView('week')} label="Tuần" />
-          <NavBtn icon={<LayoutDashboard size={22} />} active={currentView === 'vision'} onClick={() => setCurrentView('vision')} label="Tầm nhìn" />
+        <nav className="flex-1 flex flex-col gap-6">
+          <NavBtn icon={<Home size={22} />} active={currentView === 'dashboard'} onClick={() => handleNavigate('dashboard')} label="Dashboard" />
+          <NavBtn icon={<Layers size={22} />} active={currentView === 'year'} onClick={() => handleNavigate('year')} label="Năm" />
+          <NavBtn icon={<Calendar size={22} />} active={currentView === 'month'} onClick={() => handleNavigate('month')} label="Tháng" />
+          <NavBtn icon={<Columns size={22} />} active={currentView === 'week'} onClick={() => handleNavigate('week')} label="Tuần" />
+          <NavBtn icon={<Layout size={22} />} active={currentView === 'day'} onClick={() => handleNavigate('day', new Date())} label="Ngày" />
+          <NavBtn icon={<LayoutDashboard size={22} />} active={currentView === 'vision'} onClick={() => handleNavigate('vision')} label="Tầm nhìn" />
         </nav>
         <button onClick={triggerRefresh} className="p-2 text-slate-300 hover:text-rose-500 transition-colors">
           <RefreshCw size={20} className={refreshKey > 0 ? 'animate-spin' : ''} />
@@ -151,10 +184,10 @@ const App: React.FC = () => {
           <div className="flex items-center gap-4">
             <div className="lg:hidden text-rose-500"><Zap size={22} className="fill-rose-500" /></div>
             <div className="flex flex-col">
-              <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">KẾ HOẠCH 2026</span>
+              <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">PLANNER CHUYỂN GIAO</span>
               <h1 className="text-sm font-bold flex items-center gap-2 capitalize">
                 {getTitle()}
-                {['day', 'month'].includes(currentView) && (
+                {['day', 'month', 'week'].includes(currentView) && (
                   <div className="flex items-center gap-1 ml-2">
                     <button onClick={() => navigateDate('prev')} className="p-1 hover:bg-slate-50 rounded text-slate-400"><ChevronLeft size={16} /></button>
                     <button onClick={() => navigateDate('next')} className="p-1 hover:bg-slate-50 rounded text-slate-400"><ChevronRight size={16} /></button>
@@ -174,7 +207,7 @@ const App: React.FC = () => {
         <main className="flex-1 overflow-hidden relative">
           <div className="absolute inset-0 overflow-y-auto custom-scrollbar p-4 lg:p-10">
             <div className="max-w-6xl mx-auto page-transition" key={refreshKey}>
-              {currentView === 'dashboard' && <Dashboard onNavigate={setCurrentView} onUpdate={triggerRefresh} />}
+              {currentView === 'dashboard' && <Dashboard onNavigate={handleNavigate} onUpdate={triggerRefresh} />}
               {currentView === 'year' && <YearView onSelectDate={(d) => { setCurrentDate(d); setCurrentView('month'); }} refreshKey={refreshKey} />}
               {currentView === 'month' && <MonthView date={currentDate} onSelectDate={(d) => { setCurrentDate(d); setCurrentView('day'); }} refreshKey={refreshKey} onUpdate={triggerRefresh} />}
               {currentView === 'week' && <WeekView date={currentDate} onSelectDate={(d) => { setCurrentDate(d); setCurrentView('day'); }} onUpdate={triggerRefresh} refreshKey={refreshKey} />}
@@ -187,22 +220,14 @@ const App: React.FC = () => {
         {/* Mobile Tab Bar */}
         <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 mobile-nav-glass">
           <nav className="flex items-center justify-around px-4 pt-3">
-            <MobileTab icon={<Home size={24} />} active={currentView === 'dashboard'} onClick={() => setCurrentView('dashboard')} />
-            <MobileTab icon={<Calendar size={24} />} active={currentView === 'month'} onClick={() => setCurrentView('month')} />
-            <MobileTab icon={<Layout size={24} />} active={currentView === 'day'} onClick={() => setCurrentView('day')} />
-            <MobileTab icon={<LayoutDashboard size={24} />} active={currentView === 'vision'} onClick={() => setCurrentView('vision')} />
+            <MobileTab icon={<Home size={24} />} active={currentView === 'dashboard'} onClick={() => handleNavigate('dashboard')} />
+            <MobileTab icon={<Calendar size={24} />} active={currentView === 'month'} onClick={() => handleNavigate('month')} />
+            <MobileTab icon={<Columns size={24} />} active={currentView === 'week'} onClick={() => handleNavigate('week')} />
+            <MobileTab icon={<Layout size={24} />} active={currentView === 'day'} onClick={() => handleNavigate('day', new Date())} />
+            <MobileTab icon={<LayoutDashboard size={24} />} active={currentView === 'vision'} onClick={() => handleNavigate('vision')} />
           </nav>
         </div>
       </div>
     </div>
   );
-};
-
-const NavBtn: React.FC<{ icon: React.ReactNode; active: boolean; onClick: () => void; label: string }> = ({ icon, active, onClick, label }) => (
-  <button onClick={onClick} className={`p-3 rounded-2xl transition-all relative group ${active ? 'bg-rose-500 text-white shadow-lg shadow-rose-200' : 'text-slate-400 hover:text-slate-900 hover:bg-slate-50'}`}>{icon}</button>
-);
-const MobileTab: React.FC<{ icon: React.ReactNode; active: boolean; onClick: () => void }> = ({ icon, active, onClick }) => (
-  <button onClick={onClick} className={`p-3 rounded-2xl transition-all ${active ? 'text-rose-500 bg-rose-50' : 'text-slate-400'}`}>{icon}</button>
-);
-
-export default App;
+}

@@ -1,12 +1,8 @@
 
 import { GoogleGenAI, Type } from "@google/genai";
 
-// Guideline: Create a new GoogleGenAI instance right before making an API call 
-// to ensure it always uses the most up-to-date API key from the execution context.
-
 export const generateVisionImage = async (prompt: string): Promise<string | null> => {
   try {
-    // Initializing inside the function to use the most recent process.env.API_KEY
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash-image',
@@ -20,7 +16,6 @@ export const generateVisionImage = async (prompt: string): Promise<string | null
       }
     });
 
-    // Iterate through all parts to find the image part, as the response may contain both text and image parts
     for (const part of response.candidates?.[0]?.content?.parts || []) {
       if (part.inlineData) {
         return `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
@@ -35,7 +30,6 @@ export const generateVisionImage = async (prompt: string): Promise<string | null
 
 export const getPlanningSuggestions = async (goals: string) => {
   try {
-    // Initializing inside the function to use the most recent process.env.API_KEY
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
@@ -55,10 +49,25 @@ export const getPlanningSuggestions = async (goals: string) => {
         }
       }
     });
-    // Use .text property directly (not as a method) to extract output string
     return JSON.parse(response.text || '[]');
   } catch (error) {
     console.error("Error getting planning suggestions:", error);
     return [];
+  }
+};
+
+export const getDailyInsight = async (status: string): Promise<string> => {
+  try {
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    const response = await ai.models.generateContent({
+      model: 'gemini-3-flash-preview',
+      contents: `Tình trạng hiện tại của người dùng: ${status}. Hãy đưa ra 1 câu khuyên hoặc động viên ngắn gọn, chân thành, phong cách hiện đại (tiếng Việt), tối đa 15 từ.`,
+      config: {
+        systemInstruction: "Bạn là một trợ lý ảo thông minh, tâm lý cho một người mẹ đang sử dụng app planner. Hãy nói năng lễ phép nhưng gần gũi."
+      }
+    });
+    return response.text || "Chúc má một ngày rực rỡ và đầy năng lượng!";
+  } catch (error) {
+    return "Mỗi bước nhỏ đều dẫn tới thành công lớn. Cố lên má nhé!";
   }
 };
