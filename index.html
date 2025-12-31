@@ -4,83 +4,84 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Lumina Planner 2026</title>
+    <title>Lumina 2026 • Light Center</title>
     
-    <!-- PWA & iOS Support -->
     <link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Lumina 2026">
-    <link rel="apple-touch-icon" href="https://img.icons8.com/fluency/192/000000/calendar-external-link.png">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
     
-    <!-- Theme Color for iOS Status Bar -->
-    <meta name="theme-color" content="#4f46e5">
-
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Đổi font sang Be Vietnam Pro (Sans) và Lora (Serif) hỗ trợ tiếng Việt cực tốt -->
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,400;0,600;0,700;0,800;0,900;1,400;1,600&family=Lora:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
+    
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['"Be Vietnam Pro"', 'sans-serif'],
+              serif: ['Lora', 'serif'],
+            },
+          },
+        },
+      }
+    </script>
+
     <style>
         :root {
-            --sat: env(safe-area-inset-top);
-            --sar: env(safe-area-inset-right);
-            --sab: env(safe-area-inset-bottom);
-            --sal: env(safe-area-inset-left);
+            --rose: #f43f5e;
+            --indigo: #4338ca;
+            --slate-50: #f8fafc;
+            --slate-900: #0f172a;
+            --safe-bottom: env(safe-area-inset-bottom);
         }
+
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: #fcfcfd;
-            -webkit-tap-highlight-color: transparent;
-            /* Ngăn chặn overscroll bounce trên iOS */
+            font-family: 'Be Vietnam Pro', sans-serif;
+            background-color: #ffffff;
+            color: var(--slate-900);
             overflow: hidden;
             position: fixed;
             width: 100%;
             height: 100%;
-        }
-        #root {
-            height: 100%;
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-        }
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 6px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: #f1f1f1;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #e2e2e2;
-            border-radius: 10px;
-        }
-        /* Mobile safe area padding for iOS Devices */
-        .pb-safe {
-            padding-bottom: calc(env(safe-area-inset-bottom) + 12px);
-        }
-        .pt-safe {
-            padding-top: env(safe-area-inset-top);
-        }
-        
-        @keyframes pulse-subtle {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.5; }
-        }
-        .animate-pulse-subtle {
-          animation: pulse-subtle 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+            -webkit-font-smoothing: antialiased;
+            touch-action: manipulation;
         }
 
-        /* Tối ưu hóa việc cuộn trên iOS */
-        .scroll-container {
-            -webkit-overflow-scrolling: touch;
-            overflow-y: auto;
+        /* Pop Shadows */
+        .widget-shadow {
+            box-shadow: 0 10px 30px -10px rgba(15, 23, 42, 0.08);
+            border: 1px solid rgba(15, 23, 42, 0.05);
         }
 
-        /* Ngăn người dùng chọn text trừ khi cần thiết */
-        * {
-            -webkit-touch-callout: none;
-            -webkit-user-select: none;
+        /* App-like Transitions */
+        .page-transition {
+            animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
-        input, textarea, [contenteditable="true"] {
-            -webkit-user-select: text;
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
+
+        /* Compact Scrollbar */
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+
+        /* Mobile Nav Glass */
+        .mobile-nav-glass {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(15, 23, 42, 0.05);
+            padding-bottom: calc(0.8rem + var(--safe-bottom));
+        }
+
+        .compact-row {
+            height: 44px;
+            border-bottom: 1px solid rgba(15, 23, 42, 0.03);
+        }
+
+        input:focus { outline: none; }
     </style>
 <script type="importmap">
 {
@@ -91,7 +92,8 @@
     "date-fns": "https://esm.sh/date-fns@^4.1.0",
     "lucide-react": "https://esm.sh/lucide-react@^0.562.0",
     "@google/genai": "https://esm.sh/@google/genai@^1.34.0",
-    "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@^2.45.4"
+    "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@^2.45.4",
+    "date-fns/": "https://esm.sh/date-fns@^4.1.0/"
   }
 }
 </script>

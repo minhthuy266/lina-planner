@@ -1,182 +1,208 @@
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Calendar, 
   Layout, 
-  Image as ImageIcon, 
   ChevronLeft, 
   ChevronRight,
-  Plus,
-  Target,
-  Clock,
-  Cloud,
-  CloudOff,
-  RefreshCw
+  Search,
+  RefreshCw,
+  LayoutDashboard,
+  Home,
+  Layers,
+  Zap,
+  Bell,
+  AlertTriangle,
+  Info
 } from 'lucide-react';
 import { ViewType } from './types';
+import Dashboard from './components/Dashboard';
 import MonthView from './components/MonthView';
 import WeekView from './components/WeekView';
 import DayView from './components/DayView';
+import YearView from './components/YearView';
 import VisionBoard from './components/VisionBoard';
-import { format, addMonths, subMonths } from 'date-fns';
-import { supabase } from './services/supabaseClient';
 import { dataService } from './services/dataService';
+import { format, addMonths } from 'date-fns';
+import { vi } from 'date-fns/locale/vi';
 
 const App: React.FC = () => {
-  const [currentView, setCurrentView] = useState<ViewType>('month');
+  const [currentView, setCurrentView] = useState<ViewType>('dashboard');
   const [currentDate, setCurrentDate] = useState(new Date(2026, 0, 1));
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [isOnline, setIsOnline] = useState(true);
   const [refreshKey, setRefreshKey] = useState(0);
-
-  const checkConnection = useCallback(async () => {
-    try {
-      const { error } = await supabase.from('tasks').select('count', { count: 'exact', head: true });
-      setIsOnline(!error);
-    } catch {
-      setIsOnline(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    checkConnection();
-  }, [checkConnection]);
+  const [showNotificationPrompt, setShowNotificationPrompt] = useState(false);
+  const [notifError, setNotifError] = useState<string | null>(null);
 
   const triggerRefresh = () => setRefreshKey(prev => prev + 1);
 
-  const handleQuickAdd = async () => {
-    const title = window.prompt(`New task for ${format(currentDate, 'MMM do')}:`);
-    if (title && title.trim()) {
-      await dataService.createTask({
-        title,
-        date: format(currentDate, 'yyyy-MM-dd'),
-        priority: 'medium'
-      });
-      triggerRefresh();
+  useEffect(() => {
+    const hasPrompted = localStorage.getItem('lumina_notif_prompted');
+    if ("Notification" in window) {
+      if (Notification.permission === "default" && !hasPrompted) {
+        const timer = setTimeout(() => setShowNotificationPrompt(true), 1500);
+        return () => clearTimeout(timer);
+      } else if (Notification.permission === "granted") {
+        checkDiscipline();
+      }
     }
+  }, [refreshKey]); // Kiểm tra kỷ luật mỗi khi có cập nhật
+
+  const checkDiscipline = async () => {
+    if (!("Notification" in window) || Notification.permission !== "granted") return;
+    const habits = await dataService.getHabits();
+    const today = format(new Date(), 'yyyy-MM-dd');
+    const undoneHabits = habits.filter(h => h.lastCompleted !== today);
+    if (undoneHabits.length > 0) {
+      try {
+        new Notification("Lumina Discipline", {
+          body: `Má ơi! Má còn ${undoneHabits.length} thói quen chưa hoàn thành hôm nay.`,
+          icon: "https://img.icons8.com/fluency/192/000000/calendar-external-link.png"
+        });
+      } catch (e) { console.error("Notif failed:", e); }
+    }
+  };
+
+  const requestNotificationPermission = async () => {
+    setNotifError(null);
+    if (!("Notification" in window)) {
+      setNotifError("Trình duyệt này không hỗ trợ thông báo má ơi!");
+      return;
+    }
+    try {
+      const permission = await Notification.requestPermission();
+      localStorage.setItem('lumina_notif_prompted', 'true');
+      if (permission === "granted") {
+        setShowNotificationPrompt(false);
+        checkDiscipline();
+      } else if (permission === "denied") {
+        setNotifError("Má đã chặn thông báo rồi. Hãy bật lại trong cài đặt trình duyệt nhé!");
+      } else {
+        setShowNotificationPrompt(false);
+      }
+    } catch (error) { setNotifError("Có lỗi xảy ra khi xin quyền."); }
   };
 
   const navigateDate = (direction: 'prev' | 'next') => {
     if (currentView === 'month') {
-      setCurrentDate(prev => direction === 'next' ? addMonths(prev, 1) : subMonths(prev, 1));
-    } else if (currentView === 'week') {
-      const days = direction === 'next' ? 7 : -7;
-      setCurrentDate(prev => {
-        const d = new Date(prev);
-        d.setDate(d.getDate() + days);
-        return d;
-      });
+      setCurrentDate(prev => direction === 'next' ? addMonths(prev, 1) : addMonths(prev, -1));
     } else {
-      const days = direction === 'next' ? 1 : -1;
+      const delta = direction === 'next' ? 1 : -1;
       setCurrentDate(prev => {
         const d = new Date(prev);
-        d.setDate(d.getDate() + days);
+        d.setDate(d.getDate() + delta);
         return d;
       });
     }
   };
 
-  const renderContent = () => {
-    switch (currentView) {
-      case 'month': return <MonthView key={`month-${refreshKey}`} date={currentDate} onSelectDate={(d) => { setCurrentDate(d); setCurrentView('day'); }} />;
-      case 'week': return <WeekView key={`week-${refreshKey}`} date={currentDate} onSelectDate={(d) => { setCurrentDate(d); setCurrentView('day'); }} />;
-      case 'day': return <DayView key={`day-${refreshKey}`} date={currentDate} onUpdate={triggerRefresh} />;
-      case 'vision': return <VisionBoard key={`vision-${refreshKey}`} />;
-      default: return null;
+  const getTitle = () => {
+    switch(currentView) {
+      case 'dashboard': return 'Tổng quan';
+      case 'year': return 'Lộ trình năm 2026';
+      case 'month': return format(currentDate, 'MMMM, yyyy', { locale: vi });
+      case 'week': return 'Kế hoạch tuần';
+      case 'day': return format(currentDate, 'eeee, dd/MM', { locale: vi });
+      case 'vision': return 'Bảng tầm nhìn';
+      default: return 'Lumina 2026';
     }
   };
 
   return (
-    <div className="flex h-full bg-[#fcfcfd] text-slate-900 overflow-hidden font-sans flex-col md:flex-row">
-      {/* Desktop Sidebar */}
-      <aside className={`hidden md:flex ${isSidebarOpen ? 'w-64' : 'w-20'} transition-all duration-300 border-r border-slate-200 bg-white flex-col`}>
-        <div className="p-6 flex items-center gap-3">
-          <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white shrink-0 shadow-lg shadow-indigo-200">
-            <Target size={20} />
+    <div className="flex h-screen w-full bg-[#fcfcfd] text-slate-900 overflow-hidden flex-col lg:flex-row">
+      {showNotificationPrompt && (
+        <div className="fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-6">
+          <div className="bg-white rounded-[2.5rem] p-8 max-w-sm w-full text-center shadow-2xl animate-in zoom-in-95 duration-300">
+            <div className="w-16 h-16 bg-rose-50 text-rose-500 rounded-2xl flex items-center justify-center mx-auto mb-6">
+              <Bell size={32} className="animate-bounce" />
+            </div>
+            <h3 className="text-xl font-black mb-2">Bật Nhắc nhở Kỷ luật?</h3>
+            <p className="text-sm text-slate-500 mb-6 font-medium">Lumina sẽ nhắc má khi má quên thực hiện thói quen.</p>
+            {notifError && (
+              <div className="bg-amber-50 text-amber-700 p-4 rounded-xl text-[10px] font-bold uppercase mb-6 flex items-start gap-2 text-left">
+                <Info size={14} className="shrink-0" /> {notifError}
+              </div>
+            )}
+            <div className="flex flex-col gap-3">
+              <button onClick={requestNotificationPermission} className="bg-rose-500 text-white font-black py-4 rounded-2xl text-xs uppercase tracking-widest shadow-lg active:scale-95 transition-all">Kích hoạt ngay</button>
+              <button onClick={() => { setShowNotificationPrompt(false); localStorage.setItem('lumina_notif_prompted', 'true'); }} className="text-slate-400 font-black py-2 text-[10px] uppercase tracking-widest">Để sau</button>
+            </div>
           </div>
-          {isSidebarOpen && <span className="font-bold text-xl tracking-tight text-slate-800">Lumina</span>}
         </div>
+      )}
 
-        <nav className="flex-1 px-4 space-y-2 mt-4">
-          <NavItem icon={<Calendar size={20} />} label="Month" active={currentView === 'month'} onClick={() => setCurrentView('month')} collapsed={!isSidebarOpen} />
-          <NavItem icon={<Layout size={20} />} label="Week" active={currentView === 'week'} onClick={() => setCurrentView('week')} collapsed={!isSidebarOpen} />
-          <NavItem icon={<Clock size={20} />} label="Day" active={currentView === 'day'} onClick={() => setCurrentView('day')} collapsed={!isSidebarOpen} />
-          <NavItem icon={<ImageIcon size={20} />} label="Vision" active={currentView === 'vision'} onClick={() => setCurrentView('vision')} collapsed={!isSidebarOpen} />
+      {/* Sidebar */}
+      <aside className="hidden lg:flex w-20 flex-col items-center py-10 bg-white shrink-0 border-r border-slate-100 shadow-sm z-50">
+        <div className="mb-14"><Zap size={28} className="text-rose-500 fill-rose-500" /></div>
+        <nav className="flex-1 flex flex-col gap-8">
+          <NavBtn icon={<Home size={22} />} active={currentView === 'dashboard'} onClick={() => setCurrentView('dashboard')} label="Nhà" />
+          <NavBtn icon={<Layers size={22} />} active={currentView === 'year'} onClick={() => setCurrentView('year')} label="Năm" />
+          <NavBtn icon={<Calendar size={22} />} active={currentView === 'month'} onClick={() => setCurrentView('month')} label="Tháng" />
+          <NavBtn icon={<Layout size={22} />} active={currentView === 'week'} onClick={() => setCurrentView('week')} label="Tuần" />
+          <NavBtn icon={<LayoutDashboard size={22} />} active={currentView === 'vision'} onClick={() => setCurrentView('vision')} label="Tầm nhìn" />
         </nav>
-
-        <div className="p-4 border-t border-slate-100 space-y-2">
-           <button onClick={triggerRefresh} className="w-full flex items-center gap-3 p-3 text-slate-500 hover:bg-slate-50 rounded-xl transition-all">
-             <RefreshCw size={20} className={refreshKey > 0 ? 'animate-spin' : ''} />
-             {isSidebarOpen && <span className="text-sm font-medium">Sync Now</span>}
-           </button>
-           <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="w-full flex items-center justify-center p-2 hover:bg-slate-50 rounded-lg transition-colors text-slate-400">
-             {isSidebarOpen ? <ChevronLeft size={20} /> : <ChevronRight size={20} />}
-           </button>
-        </div>
+        <button onClick={triggerRefresh} className="p-2 text-slate-300 hover:text-rose-500 transition-colors">
+          <RefreshCw size={20} className={refreshKey > 0 ? 'animate-spin' : ''} />
+        </button>
       </aside>
 
-      {/* Main Content Area */}
-      <main className="flex-1 flex flex-col overflow-hidden relative">
-        <header className="pt-safe border-b border-slate-200 bg-white/80 backdrop-blur-md sticky top-0 z-10 shrink-0">
-          <div className="h-14 md:h-16 flex items-center justify-between px-4 md:px-8">
-            <div className="flex items-center gap-2 md:gap-4 overflow-hidden">
-              <h1 className="text-base md:text-xl font-bold text-slate-800 truncate">
-                {currentView === 'vision' ? '2026 Vision' : format(currentDate, currentView === 'month' ? 'MMM yyyy' : 'MMM d, yyyy')}
+      {/* Main Container */}
+      <div className="flex-1 flex flex-col min-w-0 pb-16 lg:pb-0">
+        <header className="h-14 lg:h-16 bg-white/80 backdrop-blur-md border-b border-slate-100 flex items-center justify-between px-5 shrink-0 z-40">
+          <div className="flex items-center gap-4">
+            <div className="lg:hidden text-rose-500"><Zap size={22} className="fill-rose-500" /></div>
+            <div className="flex flex-col">
+              <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">KẾ HOẠCH 2026</span>
+              <h1 className="text-sm font-bold flex items-center gap-2 capitalize">
+                {getTitle()}
+                {['day', 'month'].includes(currentView) && (
+                  <div className="flex items-center gap-1 ml-2">
+                    <button onClick={() => navigateDate('prev')} className="p-1 hover:bg-slate-50 rounded text-slate-400"><ChevronLeft size={16} /></button>
+                    <button onClick={() => navigateDate('next')} className="p-1 hover:bg-slate-50 rounded text-slate-400"><ChevronRight size={16} /></button>
+                  </div>
+                )}
               </h1>
-              {currentView !== 'vision' && (
-                <div className="flex items-center bg-slate-100/50 rounded-lg p-0.5 border border-slate-200/50">
-                  <button onClick={() => navigateDate('prev')} className="p-1 hover:bg-white rounded transition-all"><ChevronLeft size={16} /></button>
-                  <button onClick={() => navigateDate('next')} className="p-1 hover:bg-white rounded transition-all"><ChevronRight size={16} /></button>
-                </div>
-              )}
             </div>
-            
-            <div className="flex items-center gap-3">
-               <div className="md:hidden">
-                  {isOnline ? <Cloud size={18} className="text-emerald-500" /> : <CloudOff size={18} className="text-slate-300" />}
-               </div>
-              <button 
-                onClick={handleQuickAdd}
-                className="flex items-center justify-center bg-indigo-600 text-white w-9 h-9 md:w-auto md:px-5 md:py-2.5 rounded-full md:rounded-xl text-sm font-bold hover:bg-indigo-700 active:scale-95 transition-all shadow-md shadow-indigo-100"
-              >
-                <Plus size={20} />
-                <span className="hidden md:inline ml-2">New Task</span>
-              </button>
+          </div>
+          <div className="flex items-center gap-4">
+            <button className="text-slate-400 p-2"><Search size={18} /></button>
+            <div className="w-8 h-8 rounded-full bg-slate-100 border border-slate-200 overflow-hidden">
+               <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="avatar" />
             </div>
           </div>
         </header>
 
-        {/* Scrollable Content */}
-        <div className="flex-1 overflow-y-auto scroll-container custom-scrollbar p-4 md:p-8 pb-24 md:pb-8">
-          <div className="max-w-7xl mx-auto">
-            {renderContent()}
+        <main className="flex-1 overflow-hidden relative">
+          <div className="absolute inset-0 overflow-y-auto custom-scrollbar p-4 lg:p-10">
+            <div className="max-w-6xl mx-auto page-transition" key={refreshKey}>
+              {currentView === 'dashboard' && <Dashboard onNavigate={setCurrentView} onUpdate={triggerRefresh} />}
+              {currentView === 'year' && <YearView onSelectDate={(d) => { setCurrentDate(d); setCurrentView('month'); }} refreshKey={refreshKey} />}
+              {currentView === 'month' && <MonthView date={currentDate} onSelectDate={(d) => { setCurrentDate(d); setCurrentView('day'); }} refreshKey={refreshKey} onUpdate={triggerRefresh} />}
+              {currentView === 'week' && <WeekView date={currentDate} onSelectDate={(d) => { setCurrentDate(d); setCurrentView('day'); }} onUpdate={triggerRefresh} refreshKey={refreshKey} />}
+              {currentView === 'day' && <DayView date={currentDate} onUpdate={triggerRefresh} refreshKey={refreshKey} />}
+              {currentView === 'vision' && <VisionBoard />}
+            </div>
           </div>
-        </div>
+        </main>
 
         {/* Mobile Tab Bar */}
-        <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-xl border-t border-slate-200 flex justify-around items-center px-4 pt-3 pb-safe z-50">
-          <MobileTab icon={<Calendar size={22} />} active={currentView === 'month'} onClick={() => setCurrentView('month')} />
-          <MobileTab icon={<Layout size={22} />} active={currentView === 'week'} onClick={() => setCurrentView('week')} />
-          <MobileTab icon={<Clock size={22} />} active={currentView === 'day'} onClick={() => setCurrentView('day')} />
-          <MobileTab icon={<ImageIcon size={22} />} active={currentView === 'vision'} onClick={() => setCurrentView('vision')} />
-        </nav>
-      </main>
+        <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 mobile-nav-glass">
+          <nav className="flex items-center justify-around px-4 pt-3">
+            <MobileTab icon={<Home size={24} />} active={currentView === 'dashboard'} onClick={() => setCurrentView('dashboard')} />
+            <MobileTab icon={<Calendar size={24} />} active={currentView === 'month'} onClick={() => setCurrentView('month')} />
+            <MobileTab icon={<Layout size={24} />} active={currentView === 'day'} onClick={() => setCurrentView('day')} />
+            <MobileTab icon={<LayoutDashboard size={24} />} active={currentView === 'vision'} onClick={() => setCurrentView('vision')} />
+          </nav>
+        </div>
+      </div>
     </div>
   );
 };
 
-const NavItem: React.FC<{ icon: React.ReactNode; label: string; active: boolean; onClick: () => void; collapsed: boolean }> = ({ icon, label, active, onClick, collapsed }) => (
-  <button onClick={onClick} className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${active ? 'bg-indigo-50 text-indigo-700' : 'text-slate-500 hover:bg-slate-50'}`}>
-    <div className={active ? 'text-indigo-600' : ''}>{icon}</div>
-    {!collapsed && <span className="font-semibold text-sm">{label}</span>}
-  </button>
+const NavBtn: React.FC<{ icon: React.ReactNode; active: boolean; onClick: () => void; label: string }> = ({ icon, active, onClick, label }) => (
+  <button onClick={onClick} className={`p-3 rounded-2xl transition-all relative group ${active ? 'bg-rose-500 text-white shadow-lg shadow-rose-200' : 'text-slate-400 hover:text-slate-900 hover:bg-slate-50'}`}>{icon}</button>
 );
-
 const MobileTab: React.FC<{ icon: React.ReactNode; active: boolean; onClick: () => void }> = ({ icon, active, onClick }) => (
-  <button onClick={onClick} className={`p-2 transition-all flex flex-col items-center justify-center ${active ? 'text-indigo-600' : 'text-slate-400'}`}>
-    {icon}
-    <div className={`w-1 h-1 rounded-full mt-1 ${active ? 'bg-indigo-600' : 'bg-transparent'}`}></div>
-  </button>
+  <button onClick={onClick} className={`p-3 rounded-2xl transition-all ${active ? 'text-rose-500 bg-rose-50' : 'text-slate-400'}`}>{icon}</button>
 );
 
 export default App;

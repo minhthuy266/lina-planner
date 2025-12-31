@@ -1,10 +1,9 @@
 
 import React, { useState, useEffect } from 'react';
-import { Sparkles, Loader2, Tag, Trash2, ExternalLink } from 'lucide-react';
+import { Sparkles, Loader2, Trash2, Camera, Zap, Plus } from 'lucide-react';
 import { generateVisionImage } from '../services/geminiService';
 import { dataService } from '../services/dataService';
 import { VisionItem } from '../types';
-// Import format from date-fns to fix the "Cannot find name 'format'" error
 import { format } from 'date-fns';
 
 const VisionBoard: React.FC = () => {
@@ -29,20 +28,16 @@ const VisionBoard: React.FC = () => {
     setIsGenerating(true);
     const imageUrl = await generateVisionImage(prompt);
     if (imageUrl) {
-      const newItem: Partial<VisionItem> = { 
-        content: imageUrl, 
-        category: 'Personal',
-        label: prompt
-      };
+      const newItem: Partial<VisionItem> = { content: imageUrl, category: 'Dream', label: prompt.toUpperCase() };
       await dataService.saveVisionItem(newItem);
-      await loadItems(); // Refresh from DB
+      await loadItems();
       setPrompt('');
     }
     setIsGenerating(false);
   };
 
   const handleDelete = async (id: string) => {
-    if (window.confirm('Remove this vision from your board?')) {
+    if (window.confirm('Archive this vision?')) {
       setVisionItems(prev => prev.filter(v => v.id !== id));
       await dataService.deleteVisionItem(id);
     }
@@ -50,25 +45,27 @@ const VisionBoard: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="h-64 flex flex-col items-center justify-center gap-4">
-        <Loader2 className="animate-spin text-indigo-600" size={32} />
-        <p className="text-slate-400 text-sm font-bold uppercase tracking-widest">Manifesting Vision...</p>
+      <div className="h-[60vh] flex flex-col items-center justify-center gap-6">
+        <div className="w-16 h-16 border-4 border-rose-100 border-t-rose-600 rounded-full animate-spin"></div>
+        <p className="text-rose-600 font-black uppercase tracking-widest text-[10px]">Manifesting...</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <section className="bg-white rounded-3xl p-6 md:p-12 border border-slate-200 shadow-sm text-center relative overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-rose-500"></div>
-        <h2 className="text-2xl md:text-3xl font-extrabold text-slate-800 mb-2">2026 Vision Board</h2>
-        <p className="text-slate-500 text-sm mb-8 font-medium">Describe your dreams for 2026 and let Lumina's AI visualize your path.</p>
+    <div className="space-y-12 animate-in fade-in slide-in-from-bottom-6 duration-700">
+      <section className="premium-card rounded-[3rem] p-10 md:p-20 text-center relative overflow-hidden bg-slate-950 text-white border-none shadow-2xl">
+        <div className="absolute top-0 right-0 w-80 h-80 bg-rose-600/20 rounded-full blur-[120px]"></div>
+        <div className="absolute bottom-0 left-0 w-80 h-80 bg-blue-600/10 rounded-full blur-[120px]"></div>
         
-        <div className="flex flex-col md:flex-row gap-2 max-w-2xl mx-auto bg-slate-50 p-2 rounded-2xl border border-slate-100 shadow-inner">
+        <h2 className="text-4xl md:text-6xl font-black mb-6 tracking-tighter">Manifestation Lab</h2>
+        <p className="text-slate-400 text-sm md:text-lg mb-12 font-bold uppercase tracking-[0.2em]">Dream it. Describe it. Generate it.</p>
+        
+        <div className="flex flex-col md:flex-row gap-4 max-w-4xl mx-auto bg-white/10 p-3 rounded-[2rem] border border-white/10 backdrop-blur-md">
           <input 
             type="text"
-            placeholder="A successful tech startup office in Tokyo..."
-            className="flex-1 bg-transparent px-4 py-3 text-sm focus:outline-none font-medium"
+            placeholder="Describe your 2026 goal (e.g., 'Luxury workspace in Paris')..."
+            className="flex-1 bg-transparent px-8 py-5 text-lg font-bold focus:outline-none placeholder:text-slate-500 text-white"
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
             disabled={isGenerating}
@@ -77,42 +74,39 @@ const VisionBoard: React.FC = () => {
           <button 
             onClick={handleGenerate}
             disabled={isGenerating || !prompt}
-            className="bg-indigo-600 text-white px-6 py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2 active:scale-95 transition-all disabled:opacity-50 shadow-lg shadow-indigo-100"
+            className="bg-rose-600 text-white px-10 py-5 rounded-2xl text-[12px] font-black flex items-center justify-center gap-3 active:scale-95 transition-all disabled:opacity-50 hover:bg-rose-700 uppercase tracking-widest"
           >
-            {isGenerating ? <Loader2 size={18} className="animate-spin" /> : <Sparkles size={18} />}
-            Visualize
+            {isGenerating ? <Loader2 size={18} className="animate-spin" /> : <Camera size={18} />}
+            Generate Vision
           </button>
         </div>
       </section>
 
-      <div className="columns-1 sm:columns-2 lg:columns-3 gap-6 space-y-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
         {visionItems.length === 0 ? (
-          <div className="col-span-full py-20 text-center border-2 border-dashed border-slate-200 rounded-3xl bg-slate-50/50">
-            <p className="text-slate-400 font-medium">Your vision board is empty. Start manifesting your 2026!</p>
+          <div className="col-span-full py-40 text-center border-2 border-dashed border-rose-200 rounded-[3rem] bg-rose-50/30">
+            <Sparkles size={48} className="mx-auto text-rose-300 mb-6" />
+            <p className="text-slate-400 font-black uppercase tracking-widest text-xs">Your future is a blank canvas</p>
           </div>
         ) : visionItems.map(item => (
-          <div key={item.id} className="relative group rounded-2xl overflow-hidden shadow-sm border border-slate-200 break-inside-avoid hover:shadow-xl transition-all bg-white transform hover:-translate-y-1 duration-300">
-            <img src={item.content} alt={item.label} className="w-full h-auto object-cover" />
-            <div className="p-4 bg-white">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-[10px] font-bold uppercase tracking-widest text-indigo-600 px-2.5 py-1 bg-indigo-50 rounded-full">
+          <div key={item.id} className="premium-card rounded-[2.5rem] overflow-hidden group">
+            <div className="aspect-[4/5] overflow-hidden bg-slate-100">
+              <img src={item.content} alt={item.label} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+            </div>
+            <div className="p-8">
+              <div className="flex items-center justify-between mb-4">
+                <span className="text-[10px] font-black uppercase tracking-widest text-rose-600 bg-rose-50 px-3 py-1 rounded-full">
                   {item.category}
                 </span>
-                <button 
-                  onClick={() => handleDelete(item.id)}
-                  className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-full transition-all"
-                >
-                  <Trash2 size={14} />
+                <button onClick={() => handleDelete(item.id)} className="text-slate-300 hover:text-rose-600 transition-colors">
+                  <Trash2 size={16} />
                 </button>
               </div>
-              {item.label && <p className="text-sm font-bold text-slate-800 leading-tight">{item.label}</p>}
-              {/* Using format function which is now imported above */}
-              <p className="text-[10px] text-slate-400 mt-2 font-medium">Manifested {format(new Date(item.created_at || Date.now()), 'MMM d, yyyy')}</p>
-            </div>
-            <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
-               <div className="bg-white/90 backdrop-blur p-2 rounded-full shadow-lg cursor-pointer hover:bg-white">
-                  <ExternalLink size={14} className="text-indigo-600" />
-               </div>
+              <p className="text-lg font-black text-slate-900 leading-tight mb-4 tracking-tight uppercase">{item.label}</p>
+              <div className="flex items-center gap-2 text-[10px] text-slate-400 font-bold uppercase tracking-widest">
+                <Zap size={12} className="text-amber-400 fill-amber-400" />
+                Manifested {format(new Date(item.created_at || Date.now()), 'MMM d, yyyy')}
+              </div>
             </div>
           </div>
         ))}
