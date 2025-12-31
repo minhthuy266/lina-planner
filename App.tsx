@@ -25,7 +25,7 @@ import { format, addMonths } from 'date-fns';
 import { vi } from 'date-fns/locale/vi';
 
 const IOSInstallPrompt: React.FC<{ onClose: () => void }> = ({ onClose }) => (
-  <div className="fixed inset-x-0 bottom-0 z-[150] p-4 animate-in slide-in-from-bottom-full duration-500">
+  <div className="fixed inset-x-0 bottom-0 z-[150] p-4 animate-in slide-in-from-bottom-full duration-500" style={{ marginBottom: 'env(safe-area-inset-bottom)' }}>
     <div className="bg-white/95 backdrop-blur-2xl rounded-[2.5rem] p-6 shadow-2xl border border-slate-100 relative">
       <button onClick={onClose} className="absolute top-4 right-4 text-slate-300">
         <X size={20} />
@@ -129,9 +129,10 @@ export default function App() {
   };
 
   return (
-    <div className="flex h-[100dvh] w-full bg-[#fcfcfd] text-slate-900 overflow-hidden flex-col lg:flex-row">
+    <div className="flex h-full w-full bg-[#fcfcfd] text-slate-900 overflow-hidden flex-col lg:flex-row">
       {showInstallPrompt && <IOSInstallPrompt onClose={() => { setShowInstallPrompt(false); localStorage.setItem('lumina_install_prompted', 'true'); }} />}
       
+      {/* Sidebar Desktop */}
       <aside className="hidden lg:flex w-20 flex-col items-center py-10 bg-white border-r border-slate-100 z-50">
         <div className="mb-14"><Zap size={28} className="text-rose-500 fill-rose-500" /></div>
         <nav className="flex-1 flex flex-col gap-6">
@@ -145,7 +146,7 @@ export default function App() {
       </aside>
 
       <div className="flex-1 flex flex-col min-w-0 h-full relative">
-        <header className="bg-white/80 backdrop-blur-xl border-b border-slate-100 flex items-center justify-between px-5 shrink-0 z-40">
+        <header className="shrink-0 z-40 px-5 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <h1 className="text-xs font-black uppercase tracking-widest flex items-center gap-2">
               {getTitle()}
@@ -162,9 +163,14 @@ export default function App() {
           </div>
         </header>
 
-        <main className="flex-1 relative overflow-hidden">
-          {/* SỬ DỤNG dvh ĐỂ TRÁNH KHOẢNG TRỐNG KHI PWA MỞ LÊN */}
-          <div className="absolute inset-0 overflow-y-auto custom-scrollbar pt-4 px-4 lg:p-10 pb-[calc(50px+env(safe-area-inset-bottom))] lg:pb-10">
+        {/* Content Area */}
+        <main className="flex-1 relative overflow-hidden flex flex-col">
+          <div 
+            className="flex-1 overflow-y-auto custom-scrollbar pt-4 px-4 lg:p-10"
+            style={{ 
+              paddingBottom: 'calc(var(--nav-h) + var(--sab) + 1rem)'
+            }}
+          >
             <div className="max-w-6xl mx-auto" key={refreshKey}>
               {currentView === 'dashboard' && <Dashboard onNavigate={handleNavigate} onUpdate={triggerRefresh} />}
               {currentView === 'year' && <YearView onSelectDate={(d) => { setCurrentDate(d); setCurrentView('month'); }} refreshKey={refreshKey} />}
@@ -176,8 +182,8 @@ export default function App() {
           </div>
         </main>
 
-        {/* BOTTOM NAV CHUẨN PWA STANDALONE */}
-        <div className="lg:hidden mobile-nav-glass z-50">
+        {/* Mobile Nav */}
+        <div className="lg:hidden mobile-nav-glass">
           <nav className="flex items-center justify-around w-full px-2">
             <MobileTab icon={<Home />} active={currentView === 'dashboard'} onClick={() => handleNavigate('dashboard')} />
             <MobileTab icon={<Calendar />} active={currentView === 'month'} onClick={() => handleNavigate('month')} />

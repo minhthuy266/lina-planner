@@ -37,14 +37,16 @@
             --slate-900: #0f172a;
             --sat: env(safe-area-inset-top);
             --sab: env(safe-area-inset-bottom);
+            --nav-h: 50px;
         }
 
+        /* Khóa cứng khung hình */
         html, body {
             margin: 0;
             padding: 0;
             width: 100%;
-            /* Sử dụng dvh để luôn chuẩn xác trên iOS PWA */
             height: 100dvh;
+            height: -webkit-fill-available; /* Fix cho iOS cũ */
             overflow: hidden;
             background-color: #fcfcfd;
         }
@@ -52,26 +54,34 @@
         body {
             font-family: 'Be Vietnam Pro', sans-serif;
             color: var(--slate-900);
-            position: fixed;
-            inset: 0;
             -webkit-font-smoothing: antialiased;
             touch-action: manipulation;
         }
 
-        .no-select {
-            -webkit-touch-callout: none;
-            -webkit-user-select: none;
-            user-select: none;
+        #root {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
         }
 
-        /* Mobile Tab Bar chuẩn iOS - Khít rịt không kẽ hở */
+        /* Lớp nền cho Safe Area Bottom - Tránh lộ màu trắng khi vuốt */
+        .safe-area-bottom-bg {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: var(--sab);
+            background: white;
+            z-index: 49;
+        }
+
         .mobile-nav-glass {
             background: rgba(255, 255, 255, 0.85);
             backdrop-filter: saturate(180%) blur(20px);
             -webkit-backdrop-filter: saturate(180%) blur(20px);
             border-top: 0.5px solid rgba(0, 0, 0, 0.1);
-            /* Chiều cao cố định 50px cho icon + safe area bottom */
-            height: calc(50px + var(--sab));
+            height: calc(var(--nav-h) + var(--sab));
             padding-bottom: var(--sab);
             position: fixed;
             bottom: 0;
@@ -79,25 +89,35 @@
             right: 0;
             display: flex;
             align-items: center;
+            z-index: 50;
         }
 
         header {
             padding-top: var(--sat);
-            height: calc(var(--sat) + 44px);
+            height: calc(var(--sat) + 50px);
+            background: white;
+            border-bottom: 0.5px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            display: none;
         }
 
         .custom-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
             -webkit-overflow-scrolling: touch;
-        }
-
-        #root {
-            height: 100dvh;
-            display: flex;
-            flex-direction: column;
         }
 
         * {
             -webkit-tap-highlight-color: transparent;
+            box-sizing: border-box;
+        }
+
+        .no-select {
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
         }
     </style>
 <script type="importmap">
@@ -119,6 +139,7 @@
 </head>
 <body class="no-select">
     <div id="root"></div>
+    <div class="safe-area-bottom-bg"></div>
     <script type="module" src="./index.tsx"></script>
 </body>
 </html>
