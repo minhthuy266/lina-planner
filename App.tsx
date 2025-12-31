@@ -1,16 +1,14 @@
+
 import React, { useState, useEffect } from 'react';
 import { 
   Calendar, 
   Layout, 
   ChevronLeft, 
   ChevronRight,
-  Search,
   RefreshCw,
   LayoutDashboard,
   Home,
-  Layers,
   Zap,
-  Bell,
   Columns,
   Share,
   PlusSquare,
@@ -23,7 +21,6 @@ import WeekView from './components/WeekView';
 import DayView from './components/DayView';
 import YearView from './components/YearView';
 import VisionBoard from './components/VisionBoard';
-import { dataService } from './services/dataService';
 import { format, addMonths } from 'date-fns';
 import { vi } from 'date-fns/locale/vi';
 
@@ -56,10 +53,10 @@ const IOSInstallPrompt: React.FC<{ onClose: () => void }> = ({ onClose }) => (
   </div>
 );
 
-const NavBtn: React.FC<{ icon: React.ReactNode; active: boolean; onClick: () => void; label: string }> = ({ icon, active, onClick, label }) => (
+const NavBtn: React.FC<{ icon: React.ReactNode; active: boolean; onClick: () => void; label: string }> = ({ icon, active, onClick }) => (
   <button 
     onClick={onClick} 
-    className={`p-3 rounded-2xl transition-all relative group ${active ? 'bg-rose-500 text-white shadow-lg' : 'text-slate-400 hover:text-slate-900'}`}
+    className={`p-3 rounded-2xl transition-all ${active ? 'bg-rose-500 text-white shadow-lg' : 'text-slate-400 hover:text-slate-900'}`}
   >
     {icon}
   </button>
@@ -70,9 +67,9 @@ const MobileTab: React.FC<{ icon: React.ReactNode; active: boolean; onClick: () 
     onClick={onClick} 
     className={`flex-1 flex flex-col items-center justify-center h-full transition-all ${active ? 'text-rose-500' : 'text-slate-400'}`}
   >
-    <div className={`p-2 rounded-xl ${active ? 'bg-rose-50' : ''}`}>
-      {/* Fix: Casting icon to React.ReactElement<any> to resolve TypeScript error when passing 'size' prop */}
-      {React.isValidElement(icon) ? React.cloneElement(icon as React.ReactElement<any>, { size: 24 }) : icon}
+    <div className="relative">
+      {React.isValidElement(icon) ? React.cloneElement(icon as React.ReactElement<any>, { size: 22 }) : icon}
+      {active && <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-1 h-1 bg-rose-500 rounded-full"></div>}
     </div>
   </button>
 );
@@ -81,7 +78,6 @@ export default function App() {
   const [currentView, setCurrentView] = useState<ViewType>('dashboard');
   const [currentDate, setCurrentDate] = useState(new Date());
   const [refreshKey, setRefreshKey] = useState(0);
-  const [showNotificationPrompt, setShowNotificationPrompt] = useState(false);
   const [showInstallPrompt, setShowInstallPrompt] = useState(false);
 
   const triggerRefresh = () => setRefreshKey(prev => prev + 1);
@@ -123,11 +119,11 @@ export default function App() {
   const getTitle = () => {
     switch(currentView) {
       case 'dashboard': return `Hôm nay`;
-      case 'year': return 'Lộ trình 2026';
+      case 'year': return '2026';
       case 'month': return format(currentDate, 'MMMM, yyyy', { locale: vi });
       case 'week': return `Tuần ${format(currentDate, 'ww')}`;
       case 'day': return format(currentDate, 'eeee, dd/MM', { locale: vi });
-      case 'vision': return 'Vision Board';
+      case 'vision': return 'Vision';
       default: return 'Lumina';
     }
   };
@@ -153,8 +149,7 @@ export default function App() {
       <div className="flex-1 flex flex-col min-w-0 h-full relative">
         <header className="bg-white/80 backdrop-blur-xl border-b border-slate-100 flex items-center justify-between px-5 shrink-0 z-40">
           <div className="flex items-center gap-3">
-            <div className="lg:hidden text-rose-500"><Zap size={20} className="fill-rose-500" /></div>
-            <h1 className="text-sm font-black capitalize flex items-center gap-2">
+            <h1 className="text-xs font-black uppercase tracking-widest flex items-center gap-2">
               {getTitle()}
               {['day', 'month', 'week'].includes(currentView) && (
                 <div className="flex items-center gap-0.5 ml-1">
@@ -164,14 +159,14 @@ export default function App() {
               )}
             </h1>
           </div>
-          <div className="w-8 h-8 rounded-full bg-slate-100 border border-slate-200 overflow-hidden shrink-0">
+          <div className="w-7 h-7 rounded-full bg-slate-100 border border-slate-200 overflow-hidden shrink-0">
              <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="avatar" />
           </div>
         </header>
 
         <main className="flex-1 relative overflow-hidden">
-          {/* pb-[calc(54px+env(safe-area-inset-bottom)+1rem)] : Đảm bảo scroll không bị khuất bởi tab bar và không thừa quá nhiều */}
-          <div className="absolute inset-0 overflow-y-auto custom-scrollbar p-4 lg:p-10 pb-[calc(70px+env(safe-area-inset-bottom))] lg:pb-10">
+          {/* pb-[calc(49px+env(safe-area-inset-bottom)+8px)]: Ép sát padding cho vừa khít footer 49px */}
+          <div className="absolute inset-0 overflow-y-auto custom-scrollbar p-4 lg:p-10 pb-[calc(49px+env(safe-area-inset-bottom)+8px)] lg:pb-10">
             <div className="max-w-6xl mx-auto" key={refreshKey}>
               {currentView === 'dashboard' && <Dashboard onNavigate={handleNavigate} onUpdate={triggerRefresh} />}
               {currentView === 'year' && <YearView onSelectDate={(d) => { setCurrentDate(d); setCurrentView('month'); }} refreshKey={refreshKey} />}
@@ -183,7 +178,7 @@ export default function App() {
           </div>
         </main>
 
-        {/* Mobile Tab Bar */}
+        {/* Mobile Tab Bar - Ép cao đúng 49px + Safe Area */}
         <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 mobile-nav-glass">
           <nav className="flex items-center justify-around w-full px-2 h-full">
             <MobileTab icon={<Home />} active={currentView === 'dashboard'} onClick={() => handleNavigate('dashboard')} />

@@ -63,22 +63,22 @@
             user-select: none;
         }
 
-        /* Mobile Tab Bar chuẩn iOS */
+        /* Mobile Tab Bar chuẩn iOS - Ép chiều cao xuống 49px */
         .mobile-nav-glass {
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: saturate(180%) blur(20px);
+            -webkit-backdrop-filter: saturate(180%) blur(20px);
             border-top: 0.5px solid rgba(0, 0, 0, 0.1);
             padding-bottom: var(--sab);
-            height: calc(54px + var(--sab));
+            height: calc(49px + var(--sab));
             display: flex;
             align-items: center;
         }
 
-        /* Safe Area cho Header */
+        /* Safe Area cho Header - Ép xuống 44px */
         header {
             padding-top: var(--sat);
-            height: calc(var(--sat) + 56px);
+            height: calc(var(--sat) + 44px);
         }
 
         .custom-scrollbar {
@@ -89,6 +89,11 @@
             height: 100%;
             display: flex;
             flex-direction: column;
+        }
+
+        /* Xóa bỏ highlight khi tap trên mobile */
+        * {
+            -webkit-tap-highlight-color: transparent;
         }
     </style>
 <script type="importmap">
