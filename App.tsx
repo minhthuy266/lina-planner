@@ -8,10 +8,11 @@ import {
   Home,
   Zap,
   Columns,
+  Moon,
+  Sun,
   Share,
   PlusSquare,
-  X,
-  Plus
+  X
 } from 'lucide-react';
 import { ViewType } from './types';
 import Dashboard from './components/Dashboard';
@@ -23,65 +24,29 @@ import VisionBoard from './components/VisionBoard';
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale/vi';
 
-const IOSInstallPrompt: React.FC<{ onClose: () => void }> = ({ onClose }) => (
-  <div className="fixed inset-x-4 bottom-28 z-[200] animate-in slide-in-from-bottom-full duration-700">
-    <div className="bg-white/95 backdrop-blur-3xl rounded-[2.5rem] p-6 shadow-2xl border border-white/20 relative">
-      <button onClick={onClose} className="absolute top-4 right-4 text-slate-400 p-1">
-        <X size={20} />
-      </button>
-      <div className="flex items-center gap-4 mb-5">
-        <div className="w-12 h-12 bg-rose-500 rounded-2xl flex items-center justify-center text-white shadow-xl">
-          <Zap size={24} className="fill-white" />
-        </div>
-        <div>
-          <h3 className="text-[15px] font-black text-slate-900 leading-tight">Cài đặt Lumina</h3>
-          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Trải nghiệm như App thật</p>
-        </div>
-      </div>
-      <div className="space-y-3">
-        <div className="flex items-center gap-3 bg-slate-50/50 p-3 rounded-2xl">
-          <Share size={16} className="text-blue-500" />
-          <p className="text-[11px] font-bold text-slate-600 text-left">Bấm nút <span className="text-slate-900">Chia sẻ</span> ở Safari.</p>
-        </div>
-        <div className="flex items-center gap-3 bg-slate-50/50 p-3 rounded-2xl">
-          <PlusSquare size={16} className="text-slate-700" />
-          <p className="text-[11px] font-bold text-slate-600 text-left">Chọn <span className="text-slate-900">Thêm vào MH chính</span>.</p>
-        </div>
-      </div>
-    </div>
-  </div>
-);
-
-const MobileTab: React.FC<{ icon: React.ReactNode; active: boolean; onClick: () => void; label: string }> = ({ icon, active, onClick, label }) => (
-  <button 
-    onClick={onClick} 
-    className={`flex-1 flex flex-col items-center justify-center pt-3 pb-1 transition-all ios-tap ${active ? 'text-rose-500' : 'text-slate-400'}`}
-  >
-    <div className="relative mb-0.5">
-      {React.isValidElement(icon) ? React.cloneElement(icon as React.ReactElement<any>, { size: 24, strokeWidth: active ? 2.5 : 2 }) : icon}
-    </div>
-    <span className="text-[8px] font-black uppercase tracking-tight">{label}</span>
-  </button>
-);
-
 export default function App() {
   const [currentView, setCurrentView] = useState<ViewType>('dashboard');
   const [currentDate, setCurrentDate] = useState(new Date());
   const [refreshKey, setRefreshKey] = useState(0);
-  const [showInstallPrompt, setShowInstallPrompt] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    return localStorage.getItem('theme') === 'dark' || 
+      (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  });
+
+  useEffect(() => {
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+    }
+  }, [isDarkMode]);
 
   const handleNavigate = (view: ViewType, date?: Date) => {
     if (date) setCurrentDate(new Date(date));
     setCurrentView(view);
   };
-
-  useEffect(() => {
-    const isStandalone = (window.navigator as any).standalone || window.matchMedia('(display-mode: standalone)').matches;
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
-    if (isIOS && !isStandalone && !localStorage.getItem('lumina_install_prompted')) {
-      setTimeout(() => setShowInstallPrompt(true), 4000);
-    }
-  }, []);
 
   const getTitle = () => {
     switch(currentView) {
@@ -95,33 +60,39 @@ export default function App() {
   };
 
   return (
-    <div className="flex h-full w-full bg-[#F8F9FB] flex-col lg:flex-row overflow-hidden">
-      {showInstallPrompt && <IOSInstallPrompt onClose={() => { setShowInstallPrompt(false); localStorage.setItem('lumina_install_prompted', 'true'); }} />}
-      
+    <div className="flex h-full w-full flex-col lg:flex-row overflow-hidden transition-colors duration-300">
       {/* Desktop Sidebar */}
-      <aside className="hidden lg:flex w-24 flex-col items-center py-12 bg-white border-r border-slate-100 z-50">
+      <aside className="hidden lg:flex w-24 flex-col items-center py-12 bg-white dark:bg-[#1C1C1E] border-r border-slate-100 dark:border-white/5 z-50">
         <div className="mb-16"><Zap size={32} className="text-rose-500 fill-rose-500" /></div>
         <nav className="flex-1 flex flex-col gap-8">
-          <button onClick={() => handleNavigate('dashboard')} className={`p-4 rounded-[1.5rem] ${currentView === 'dashboard' ? 'bg-rose-500 text-white shadow-xl shadow-rose-100' : 'text-slate-300'}`}><Home size={24} /></button>
-          <button onClick={() => handleNavigate('month')} className={`p-4 rounded-[1.5rem] ${currentView === 'month' ? 'bg-rose-500 text-white shadow-xl shadow-rose-100' : 'text-slate-300'}`}><Calendar size={24} /></button>
-          <button onClick={() => handleNavigate('week')} className={`p-4 rounded-[1.5rem] ${currentView === 'week' ? 'bg-rose-500 text-white shadow-xl shadow-rose-100' : 'text-slate-300'}`}><Columns size={24} /></button>
-          <button onClick={() => handleNavigate('day', new Date())} className={`p-4 rounded-[1.5rem] ${currentView === 'day' ? 'bg-rose-500 text-white shadow-xl shadow-rose-100' : 'text-slate-300'}`}><Layout size={24} /></button>
-          <button onClick={() => handleNavigate('vision')} className={`p-4 rounded-[1.5rem] ${currentView === 'vision' ? 'bg-rose-500 text-white shadow-xl shadow-rose-100' : 'text-slate-300'}`}><LayoutDashboard size={24} /></button>
+          <NavItem icon={<Home />} active={currentView === 'dashboard'} onClick={() => handleNavigate('dashboard')} />
+          <NavItem icon={<Calendar />} active={currentView === 'month'} onClick={() => handleNavigate('month')} />
+          <NavItem icon={<Columns />} active={currentView === 'week'} onClick={() => handleNavigate('week')} />
+          <NavItem icon={<Layout />} active={currentView === 'day'} onClick={() => handleNavigate('day', new Date())} />
+          <NavItem icon={<LayoutDashboard />} label="VISION" active={currentView === 'vision'} onClick={() => handleNavigate('vision')} />
         </nav>
+        <button onClick={() => setIsDarkMode(!isDarkMode)} className="p-4 rounded-2xl text-slate-400 hover:text-rose-500 transition-colors">
+          {isDarkMode ? <Sun size={24} /> : <Moon size={24} />}
+        </button>
       </aside>
 
       {/* Main Container */}
       <div className="flex-1 flex flex-col relative h-full">
         {/* Mobile Header */}
-        <header className="lg:hidden shrink-0 apple-glass px-6 border-b border-black/5 flex items-center justify-between sticky top-0 z-[100]" 
-                style={{ height: 'calc(48px + var(--sat))', paddingTop: 'var(--sat)' }}>
+        <header className="lg:hidden shrink-0 apple-glass px-6 border-b border-black/5 dark:border-white/5 flex items-center justify-between sticky top-0 z-[100]" 
+                style={{ height: 'calc(54px + var(--sat))', paddingTop: 'var(--sat)' }}>
           <div className="flex items-center gap-2">
-            <Zap size={20} className="text-rose-500 fill-rose-500" />
-            <h1 className="text-[14px] font-black uppercase tracking-[0.2em] text-slate-900">{getTitle()}</h1>
+            <Zap size={22} className="text-rose-500 fill-rose-500" />
+            <h1 className="text-[16px] font-black uppercase tracking-[0.2em] text-slate-900 dark:text-white">{getTitle()}</h1>
           </div>
           <div className="flex items-center gap-4">
-             <button onClick={() => setRefreshKey(k => k+1)} className="p-1 text-slate-400 ios-tap"><RefreshCw size={18} /></button>
-             <div className="w-8 h-8 rounded-full bg-slate-200 overflow-hidden border border-black/5 shadow-inner">
+             <button onClick={() => setIsDarkMode(!isDarkMode)} className="p-2 text-slate-400 ios-tap">
+                {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
+             </button>
+             <button onClick={() => setRefreshKey(k => k+1)} className="p-2 text-slate-400 ios-tap">
+                <RefreshCw size={20} />
+             </button>
+             <div className="w-8 h-8 rounded-full bg-slate-200 dark:bg-white/10 overflow-hidden border border-black/5">
                 <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="avatar" />
              </div>
           </div>
@@ -132,18 +103,18 @@ export default function App() {
           <div className="scroll-container custom-scrollbar">
             <div className="max-w-6xl mx-auto px-4 pt-6 lg:p-12" key={refreshKey}>
               {currentView === 'dashboard' && <Dashboard onNavigate={handleNavigate} onUpdate={() => setRefreshKey(k => k+1)} />}
-              {currentView === 'year' && <YearView onSelectDate={(d) => { setCurrentDate(d); handleNavigate('month'); }} refreshKey={refreshKey} />}
               {currentView === 'month' && <MonthView date={currentDate} onSelectDate={(d) => { setCurrentDate(d); handleNavigate('day'); }} refreshKey={refreshKey} onUpdate={() => setRefreshKey(k => k+1)} />}
               {currentView === 'week' && <WeekView date={currentDate} onSelectDate={(d) => { setCurrentDate(d); handleNavigate('day'); }} onUpdate={() => setRefreshKey(k => k+1)} refreshKey={refreshKey} />}
               {currentView === 'day' && <DayView date={currentDate} onUpdate={() => setRefreshKey(k => k+1)} refreshKey={refreshKey} />}
               {currentView === 'vision' && <VisionBoard />}
+              {currentView === 'year' && <YearView onSelectDate={(d) => { setCurrentDate(d); handleNavigate('month'); }} refreshKey={refreshKey} />}
             </div>
           </div>
         </main>
 
-        {/* iOS Style Floating Tab Bar - Fixed Padding Bottom */}
-        <div className="lg:hidden fixed bottom-0 left-0 right-0 z-[150] px-4 pb-[calc(16px + var(--sab))]">
-           <nav className="apple-glass rounded-[2.5rem] h-[72px] flex items-center justify-around px-2 shadow-[0_15px_40px_rgba(0,0,0,0.1)] border border-white/50 ring-1 ring-black/5">
+        {/* Tab Bar - Fixed Padding Bottom for iOS Bookmark */}
+        <div className="lg:hidden fixed bottom-0 left-0 right-0 z-[150] px-4 pb-[calc(12px + var(--sab))]">
+           <nav className="apple-glass rounded-[2.5rem] h-[72px] flex items-center justify-around px-2 shadow-[0_15px_40px_rgba(0,0,0,0.15)] border border-white/50 dark:border-white/10 ring-1 ring-black/5">
               <MobileTab icon={<Home />} label="HOME" active={currentView === 'dashboard'} onClick={() => handleNavigate('dashboard')} />
               <MobileTab icon={<Calendar />} label="MONTH" active={currentView === 'month'} onClick={() => handleNavigate('month')} />
               <MobileTab icon={<Columns />} label="WEEK" active={currentView === 'week'} onClick={() => handleNavigate('week')} />
@@ -155,3 +126,23 @@ export default function App() {
     </div>
   );
 }
+
+// Fix: cast icon to React.ReactElement<any> to resolve TypeScript errors with unknown props in cloneElement
+const NavItem = ({ icon, active, onClick }: any) => (
+  <button onClick={onClick} className={`p-4 rounded-[1.5rem] transition-all ${active ? 'bg-rose-500 text-white shadow-xl shadow-rose-200 dark:shadow-rose-900/20' : 'text-slate-300 dark:text-slate-600 hover:text-rose-500'}`}>
+    {React.cloneElement(icon as React.ReactElement<any>, { size: 24 })}
+  </button>
+);
+
+// Fix: cast icon to React.ReactElement<any> to resolve TypeScript errors with unknown props in cloneElement
+const MobileTab = ({ icon, active, onClick, label }: any) => (
+  <button 
+    onClick={onClick} 
+    className={`flex-1 flex flex-col items-center justify-center transition-all ios-tap ${active ? 'text-rose-500' : 'text-slate-400 dark:text-slate-600'}`}
+  >
+    <div className="mb-0.5">
+      {React.cloneElement(icon as React.ReactElement<any>, { size: 24, strokeWidth: active ? 2.5 : 2 })}
+    </div>
+    <span className="text-[8px] font-black uppercase tracking-widest">{label}</span>
+  </button>
+);

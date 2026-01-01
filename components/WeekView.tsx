@@ -102,7 +102,7 @@ const WeekView: React.FC<WeekViewProps> = ({ date, onSelectDate, onUpdate, refre
       case 'Happy': return <Smile size={14} className="text-emerald-500" />;
       case 'Sad': return <Frown size={14} className="text-rose-500" />;
       case 'Productive': return <Zap size={14} className="text-indigo-500" fill="currentColor" />;
-      default: return <Meh size={14} className="text-slate-300" />;
+      default: return <Meh size={14} className="text-slate-300 dark:text-slate-600" />;
     }
   };
 
@@ -115,14 +115,14 @@ const WeekView: React.FC<WeekViewProps> = ({ date, onSelectDate, onUpdate, refre
   }
 
   return (
-    <div className="premium-card rounded-[2.5rem] bg-white overflow-hidden animate-in fade-in slide-in-from-bottom-6 duration-700 mb-20">
+    <div className="bg-white dark:bg-[#1C1C1E] rounded-[2.5rem] overflow-hidden border border-slate-50 dark:border-white/5 shadow-sm animate-in fade-in slide-in-from-bottom-6 duration-700 mb-20">
       <div className="overflow-x-auto custom-scrollbar">
         <div className="min-w-[1100px]">
           {/* Header Row */}
-          <div className="grid grid-cols-[100px_repeat(7,1fr)] border-b border-rose-50 bg-rose-50/30 sticky top-0 z-20 backdrop-blur-md">
-            <div className="p-6 flex flex-col items-center justify-center border-r border-rose-50">
+          <div className="grid grid-cols-[100px_repeat(7,1fr)] border-b border-rose-50 dark:border-white/5 bg-rose-50/30 dark:bg-rose-900/10 sticky top-0 z-20 backdrop-blur-md">
+            <div className="p-6 flex flex-col items-center justify-center border-r border-rose-50 dark:border-white/5">
                <Clock size={16} className="text-rose-400 mb-2" />
-               <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest text-center">TIME LINE</span>
+               <span className="text-[8px] font-black text-slate-400 dark:text-slate-600 uppercase tracking-widest text-center">TIME LINE</span>
             </div>
             {days.map(day => {
               const dayStr = format(day, 'yyyy-MM-dd');
@@ -132,8 +132,8 @@ const WeekView: React.FC<WeekViewProps> = ({ date, onSelectDate, onUpdate, refre
               return (
                 <div
                   key={day.toISOString()}
-                  className={`p-4 transition-all border-r border-rose-50 last:border-r-0 flex flex-col gap-3 ${
-                    isCurrent ? 'bg-white shadow-inner' : ''
+                  className={`p-4 transition-all border-r border-rose-50 dark:border-white/5 last:border-r-0 flex flex-col gap-3 ${
+                    isCurrent ? 'bg-white dark:bg-[#2C2C2E]' : ''
                   }`}
                 >
                   <button 
@@ -141,9 +141,9 @@ const WeekView: React.FC<WeekViewProps> = ({ date, onSelectDate, onUpdate, refre
                     className="flex items-center justify-between group"
                   >
                     <div>
-                      <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{format(day, 'EEE')}</div>
+                      <div className="text-[10px] font-black text-slate-400 dark:text-slate-600 uppercase tracking-widest mb-1">{format(day, 'EEE')}</div>
                       <div className={`text-xl font-black w-10 h-10 flex items-center justify-center rounded-xl transition-all ${
-                        isCurrent ? 'bg-rose-600 text-white shadow-lg' : 'text-slate-900 group-hover:text-rose-600'
+                        isCurrent ? 'bg-rose-600 text-white shadow-lg' : 'text-slate-900 dark:text-white group-hover:text-rose-600'
                       }`}>
                         {format(day, 'd')}
                       </div>
@@ -152,20 +152,20 @@ const WeekView: React.FC<WeekViewProps> = ({ date, onSelectDate, onUpdate, refre
                       <div className="flex flex-col items-end gap-1.5">
                          <div className="flex items-center gap-1.5">
                             {getMoodIcon(reflection.mood)}
-                            <div className="flex items-center gap-1 bg-slate-50 px-1.5 py-0.5 rounded-md border border-slate-100">
+                            <div className="flex items-center gap-1 bg-slate-50 dark:bg-black/20 px-1.5 py-0.5 rounded-md border border-slate-100 dark:border-white/10">
                                <Battery size={10} className={reflection.energyLevel > 7 ? 'text-emerald-500' : 'text-rose-500'} />
-                               <span className="text-[9px] font-black">{reflection.energyLevel}</span>
+                               <span className="text-[9px] font-black dark:text-slate-400">{reflection.energyLevel}</span>
                             </div>
                          </div>
-                         <div className="text-[8px] font-black text-slate-400 uppercase tracking-tighter">UP: {reflection.wakeUpTime}</div>
+                         <div className="text-[8px] font-black text-slate-400 dark:text-slate-600 uppercase tracking-tighter">UP: {reflection.wakeUpTime}</div>
                       </div>
                     )}
                   </button>
 
                   {reflection?.focus && (
-                    <div className="bg-amber-50/50 p-2 rounded-lg border border-amber-100 flex items-start gap-1.5 min-h-[40px]">
+                    <div className="bg-amber-50/50 dark:bg-amber-500/5 p-2 rounded-lg border border-amber-100 dark:border-amber-500/20 flex items-start gap-1.5 min-h-[40px]">
                        <Target size={10} className="text-amber-500 mt-0.5 shrink-0" />
-                       <span className="text-[9px] font-bold text-amber-900 leading-tight break-words line-clamp-2 uppercase italic">{reflection.focus}</span>
+                       <span className="text-[9px] font-bold text-amber-900 dark:text-amber-200 leading-tight break-words line-clamp-2 uppercase italic">{reflection.focus}</span>
                     </div>
                   )}
                 </div>
@@ -180,8 +180,8 @@ const WeekView: React.FC<WeekViewProps> = ({ date, onSelectDate, onUpdate, refre
               const timeStr = `${hourLabel}:00`;
               
               return (
-                <div key={hour} className="grid grid-cols-[100px_repeat(7,1fr)] border-b border-rose-50/50 min-h-[110px]">
-                  <div className="p-4 text-right text-[10px] font-black text-slate-300 border-r border-rose-50 bg-white sticky left-0 z-10 flex flex-col justify-start">
+                <div key={hour} className="grid grid-cols-[100px_repeat(7,1fr)] border-b border-rose-50/50 dark:border-white/5 min-h-[110px]">
+                  <div className="p-4 text-right text-[10px] font-black text-slate-300 dark:text-slate-700 border-r border-rose-50 dark:border-white/5 bg-white dark:bg-[#1C1C1E] sticky left-0 z-10 flex flex-col justify-start">
                     {hour === 12 ? '12 PM' : hour > 12 ? `${hour - 12} PM` : `${hour} AM`}
                   </div>
                   
@@ -196,7 +196,7 @@ const WeekView: React.FC<WeekViewProps> = ({ date, onSelectDate, onUpdate, refre
                     return (
                       <div 
                         key={`${dayStr}-${hour}`} 
-                        className="p-2 border-r border-rose-50 last:border-r-0 hover:bg-rose-50/10 transition-colors flex flex-col gap-1.5 relative group min-h-[110px]"
+                        className="p-2 border-r border-rose-50 dark:border-white/5 last:border-r-0 hover:bg-rose-50/10 dark:hover:bg-rose-500/5 transition-colors flex flex-col gap-1.5 relative group min-h-[110px]"
                       >
                         {tasksAtHour.length > 0 ? (
                           tasksAtHour.map(task => (
@@ -205,10 +205,10 @@ const WeekView: React.FC<WeekViewProps> = ({ date, onSelectDate, onUpdate, refre
                               onClick={() => toggleTask(task)}
                               className={`p-2.5 rounded-xl border text-[10px] font-bold leading-tight cursor-pointer transition-all hover:scale-[1.03] shadow-sm relative group/item ${
                                 task.completed 
-                                  ? 'bg-slate-50 border-transparent opacity-40 text-slate-400' 
+                                  ? 'bg-slate-50 dark:bg-black/20 border-transparent opacity-40 text-slate-400' 
                                   : task.priority === 'high' 
-                                    ? 'bg-rose-600 border-rose-700 text-white' 
-                                    : 'bg-white border-rose-100 text-slate-800'
+                                    ? 'bg-rose-600 border-rose-700 text-white shadow-rose-900/20' 
+                                    : 'bg-white dark:bg-white/5 border-rose-100 dark:border-white/10 text-slate-800 dark:text-white'
                               }`}
                             >
                               <div className="flex items-center justify-between mb-1.5 shrink-0">
@@ -224,21 +224,14 @@ const WeekView: React.FC<WeekViewProps> = ({ date, onSelectDate, onUpdate, refre
                             </div>
                           ))
                         ) : isCellEditing ? (
-                          <div className="flex flex-col gap-2 p-1 bg-white rounded-xl shadow-xl z-10 border border-rose-200">
+                          <div className="flex flex-col gap-2 p-1 bg-white dark:bg-[#2C2C2E] rounded-xl shadow-xl z-10 border border-rose-200 dark:border-white/10">
                             <textarea 
                               ref={inputRef as any}
-                              className="w-full text-[10px] font-bold p-2 outline-none resize-none bg-transparent"
+                              className="w-full text-[10px] font-bold p-2 outline-none resize-none bg-transparent dark:text-white"
                               placeholder="Nhiệm vụ..."
                               rows={2}
                               value={quickTitle}
                               onChange={(e) => setQuickTitle(e.target.value)}
-                              onKeyDown={(e) => {
-                                if (e.key === 'Enter' && !e.shiftKey) {
-                                  e.preventDefault();
-                                  handleSaveQuickTask();
-                                }
-                                if (e.key === 'Escape') setActiveCell(null);
-                              }}
                             />
                             <div className="flex justify-end gap-1 px-1 pb-1">
                                <button onClick={handleSaveQuickTask} className="p-1 bg-rose-600 text-white rounded"><Check size={12} /></button>
@@ -252,7 +245,7 @@ const WeekView: React.FC<WeekViewProps> = ({ date, onSelectDate, onUpdate, refre
                                 setActiveCell({ day: dayStr, hour: timeStr });
                                 setQuickTitle('');
                               }}
-                              className="w-full h-full flex items-center justify-center text-rose-200 opacity-20 group-hover:opacity-100 hover:text-rose-600 transition-all active:scale-95"
+                              className="w-full h-full flex items-center justify-center text-rose-200 dark:text-rose-500/20 opacity-20 group-hover:opacity-100 hover:text-rose-600 dark:hover:text-rose-400 transition-all active:scale-95"
                             >
                               <Plus size={24} />
                             </button>

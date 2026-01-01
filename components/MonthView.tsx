@@ -62,7 +62,7 @@ const MonthView: React.FC<MonthViewProps> = ({ date, onSelectDate, refreshKey, o
       case 'Happy': return <Smile size={12} className="text-emerald-500" />;
       case 'Sad': return <Frown size={12} className="text-rose-500" />;
       case 'Productive': return <Zap size={12} className="text-indigo-500" fill="currentColor" />;
-      default: return <Meh size={12} className="text-slate-300" />;
+      default: return <Meh size={12} className="text-slate-300 dark:text-slate-600" />;
     }
   };
 
@@ -73,10 +73,10 @@ const MonthView: React.FC<MonthViewProps> = ({ date, onSelectDate, refreshKey, o
   };
 
   return (
-    <div className="premium-card rounded-[2.5rem] p-4 md:p-10 animate-in fade-in zoom-in-95 duration-500">
+    <div className="bg-white dark:bg-[#1C1C1E] rounded-[2.5rem] p-4 md:p-10 shadow-sm border border-slate-50 dark:border-white/5 animate-in fade-in zoom-in-95 duration-500">
       <div className="grid grid-cols-7 mb-8">
         {weekDays.map((day, i) => (
-          <div key={i} className="py-2 text-center text-[10px] font-black text-slate-400 uppercase tracking-[0.25em]">{day}</div>
+          <div key={i} className="py-2 text-center text-[10px] font-black text-slate-400 dark:text-slate-600 uppercase tracking-[0.25em]">{day}</div>
         ))}
       </div>
       <div className="grid grid-cols-7 gap-2 md:gap-4">
@@ -93,12 +93,12 @@ const MonthView: React.FC<MonthViewProps> = ({ date, onSelectDate, refreshKey, o
               key={day.toISOString()}
               onClick={() => onSelectDate(day)}
               className={`aspect-square md:aspect-auto md:min-h-[140px] p-2 md:p-4 rounded-2xl transition-all flex flex-col items-center md:items-start relative group border-2 ${
-                !isCurrentMonth ? 'opacity-20 pointer-events-none' : 'hover:border-rose-200 hover:bg-rose-50/30'
-              } ${isSelected ? 'bg-rose-50 border-rose-400 ring-4 ring-rose-100' : 'bg-white border-slate-50'}`}
+                !isCurrentMonth ? 'opacity-20 pointer-events-none' : 'hover:border-rose-200 dark:hover:border-rose-500/30 hover:bg-rose-50/30 dark:hover:bg-rose-500/5'
+              } ${isSelected ? 'bg-rose-50 dark:bg-rose-500/10 border-rose-400 dark:border-rose-500 ring-4 ring-rose-100 dark:ring-rose-500/20' : 'bg-white dark:bg-[#2C2C2E]/30 border-slate-50 dark:border-white/5'}`}
             >
               <div className="flex items-start justify-between w-full">
                 <span className={`text-xs md:text-lg font-black w-7 h-7 md:w-10 md:h-10 flex items-center justify-center rounded-lg transition-all ${
-                  isTodayDate ? 'bg-rose-600 text-white shadow-lg' : isSelected ? 'text-rose-700' : 'text-slate-900'
+                  isTodayDate ? 'bg-rose-600 text-white shadow-lg' : isSelected ? 'text-rose-700 dark:text-rose-400' : 'text-slate-900 dark:text-white'
                 }`}>
                   {format(day, 'd')}
                 </span>
@@ -114,7 +114,7 @@ const MonthView: React.FC<MonthViewProps> = ({ date, onSelectDate, refreshKey, o
                 {reflection?.focus && (
                   <div className="flex items-center gap-1 mb-1">
                     <Target size={10} className="text-amber-500" />
-                    <span className="text-[8px] font-black uppercase text-amber-600 truncate">{reflection.focus}</span>
+                    <span className="text-[8px] font-black uppercase text-amber-600 dark:text-amber-400 truncate">{reflection.focus}</span>
                   </div>
                 )}
                 {dayTasks.slice(0, 3).map((task) => (
@@ -122,23 +122,20 @@ const MonthView: React.FC<MonthViewProps> = ({ date, onSelectDate, refreshKey, o
                     key={task.id} 
                     onClick={(e) => handleToggleTask(e, task)}
                     className={`flex items-center gap-1.5 px-2 py-1 rounded-md border text-[9px] font-bold uppercase transition-all ${
-                      task.completed ? 'bg-slate-50 border-transparent opacity-40 text-slate-400 line-through' : 'bg-white border-slate-100 text-slate-700 hover:border-rose-200'
+                      task.completed ? 'bg-slate-50 dark:bg-black/20 border-transparent opacity-40 text-slate-400 line-through' : 'bg-white dark:bg-white/5 border-slate-100 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:border-rose-200'
                     }`}
                   >
                     <div className={`w-1 h-1 rounded-full shrink-0 ${task.completed ? 'bg-slate-300' : 'bg-rose-500'}`}></div>
                     <span className="truncate">{task.title}</span>
                   </div>
                 ))}
-                {dayTasks.length > 3 && (
-                  <div className="text-[8px] text-rose-500 font-black ml-1 uppercase tracking-widest mt-0.5">+{dayTasks.length - 3} tasks</div>
-                )}
               </div>
               
               {/* Mobile Indicators */}
               <div className="md:hidden flex gap-0.5 mt-auto pb-1">
                 {reflection && <div className={`w-1.5 h-1.5 rounded-full ${getEnergyColor(reflection.energyLevel)}`}></div>}
                 {dayTasks.slice(0, 2).map(t => (
-                  <div key={t.id} className={`w-1.5 h-1.5 rounded-full ${t.completed ? 'bg-slate-200' : 'bg-rose-500'}`}></div>
+                  <div key={t.id} className={`w-1.5 h-1.5 rounded-full ${t.completed ? 'bg-slate-200 dark:bg-slate-700' : 'bg-rose-500'}`}></div>
                 ))}
               </div>
             </button>

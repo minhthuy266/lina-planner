@@ -53,8 +53,8 @@ const VisionBoard: React.FC = () => {
   }
 
   return (
-    <div className="space-y-12 animate-in fade-in slide-in-from-bottom-6 duration-700">
-      <section className="premium-card rounded-[3rem] p-10 md:p-20 text-center relative overflow-hidden bg-slate-950 text-white border-none shadow-2xl">
+    <div className="space-y-12 animate-in fade-in slide-in-from-bottom-6 duration-700 pb-20">
+      <section className="bg-slate-950 rounded-[3rem] p-10 md:p-20 text-center relative overflow-hidden text-white border-none shadow-2xl">
         <div className="absolute top-0 right-0 w-80 h-80 bg-rose-600/20 rounded-full blur-[120px]"></div>
         <div className="absolute bottom-0 left-0 w-80 h-80 bg-blue-600/10 rounded-full blur-[120px]"></div>
         
@@ -84,26 +84,26 @@ const VisionBoard: React.FC = () => {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
         {visionItems.length === 0 ? (
-          <div className="col-span-full py-40 text-center border-2 border-dashed border-rose-200 rounded-[3rem] bg-rose-50/30">
-            <Sparkles size={48} className="mx-auto text-rose-300 mb-6" />
-            <p className="text-slate-400 font-black uppercase tracking-widest text-xs">Your future is a blank canvas</p>
+          <div className="col-span-full py-40 text-center border-2 border-dashed border-rose-200 dark:border-rose-500/20 rounded-[3rem] bg-rose-50/30 dark:bg-rose-500/5">
+            <Sparkles size={48} className="mx-auto text-rose-300 dark:text-rose-700 mb-6" />
+            <p className="text-slate-400 dark:text-slate-700 font-black uppercase tracking-widest text-xs">Your future is a blank canvas</p>
           </div>
         ) : visionItems.map(item => (
-          <div key={item.id} className="premium-card rounded-[2.5rem] overflow-hidden group">
-            <div className="aspect-[4/5] overflow-hidden bg-slate-100">
+          <div key={item.id} className="bg-white dark:bg-[#1C1C1E] rounded-[2.5rem] overflow-hidden shadow-sm border border-slate-50 dark:border-white/5 group">
+            <div className="aspect-[4/5] overflow-hidden bg-slate-100 dark:bg-black/20">
               <img src={item.content} alt={item.label} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
             </div>
-            <div className="p-8">
+            <div className="p-8 text-left">
               <div className="flex items-center justify-between mb-4">
-                <span className="text-[10px] font-black uppercase tracking-widest text-rose-600 bg-rose-50 px-3 py-1 rounded-full">
+                <span className="text-[10px] font-black uppercase tracking-widest text-rose-600 bg-rose-50 dark:bg-rose-500/10 px-3 py-1 rounded-full">
                   {item.category}
                 </span>
-                <button onClick={() => handleDelete(item.id)} className="text-slate-300 hover:text-rose-600 transition-colors">
+                <button onClick={() => handleDelete(item.id)} className="text-slate-300 dark:text-slate-700 hover:text-rose-600 transition-colors">
                   <Trash2 size={16} />
                 </button>
               </div>
-              <p className="text-lg font-black text-slate-900 leading-tight mb-4 tracking-tight uppercase">{item.label}</p>
-              <div className="flex items-center gap-2 text-[10px] text-slate-400 font-bold uppercase tracking-widest">
+              <p className="text-lg font-black text-slate-900 dark:text-white leading-tight mb-4 tracking-tight uppercase">{item.label}</p>
+              <div className="flex items-center gap-2 text-[10px] text-slate-400 dark:text-slate-600 font-bold uppercase tracking-widest">
                 <Zap size={12} className="text-amber-400 fill-amber-400" />
                 Manifested {format(new Date(item.created_at || Date.now()), 'MMM d, yyyy')}
               </div>
