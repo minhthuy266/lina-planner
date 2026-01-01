@@ -3,8 +3,6 @@ import React, { useState, useEffect } from 'react';
 import { 
   Calendar, 
   Layout, 
-  ChevronLeft, 
-  ChevronRight,
   RefreshCw,
   LayoutDashboard,
   Home,
@@ -22,12 +20,12 @@ import WeekView from './components/WeekView';
 import DayView from './components/DayView';
 import YearView from './components/YearView';
 import VisionBoard from './components/VisionBoard';
-import { format, addMonths } from 'date-fns';
+import { format } from 'date-fns';
 import { vi } from 'date-fns/locale/vi';
 
 const IOSInstallPrompt: React.FC<{ onClose: () => void }> = ({ onClose }) => (
-  <div className="fixed inset-x-4 bottom-24 z-[200] animate-in slide-in-from-bottom-full duration-700">
-    <div className="bg-white/80 backdrop-blur-3xl rounded-[2.5rem] p-6 shadow-2xl border border-white/20 relative">
+  <div className="fixed inset-x-4 bottom-28 z-[200] animate-in slide-in-from-bottom-full duration-700">
+    <div className="bg-white/95 backdrop-blur-3xl rounded-[2.5rem] p-6 shadow-2xl border border-white/20 relative">
       <button onClick={onClose} className="absolute top-4 right-4 text-slate-400 p-1">
         <X size={20} />
       </button>
@@ -57,13 +55,12 @@ const IOSInstallPrompt: React.FC<{ onClose: () => void }> = ({ onClose }) => (
 const MobileTab: React.FC<{ icon: React.ReactNode; active: boolean; onClick: () => void; label: string }> = ({ icon, active, onClick, label }) => (
   <button 
     onClick={onClick} 
-    className={`flex-1 flex flex-col items-center justify-center pt-2 pb-1 transition-all ios-tap ${active ? 'text-rose-500' : 'text-slate-400'}`}
+    className={`flex-1 flex flex-col items-center justify-center pt-3 pb-1 transition-all ios-tap ${active ? 'text-rose-500' : 'text-slate-400'}`}
   >
-    <div className="relative mb-1">
-      {React.isValidElement(icon) ? React.cloneElement(icon as React.ReactElement<any>, { size: 22, strokeWidth: active ? 2.5 : 2 }) : icon}
-      {active && <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-1 h-1 bg-rose-500 rounded-full"></div>}
+    <div className="relative mb-0.5">
+      {React.isValidElement(icon) ? React.cloneElement(icon as React.ReactElement<any>, { size: 24, strokeWidth: active ? 2.5 : 2 }) : icon}
     </div>
-    <span className="text-[9px] font-bold uppercase tracking-tighter">{label}</span>
+    <span className="text-[8px] font-black uppercase tracking-tight">{label}</span>
   </button>
 );
 
@@ -98,33 +95,33 @@ export default function App() {
   };
 
   return (
-    <div className="flex h-full w-full bg-ios-bg flex-col lg:flex-row overflow-hidden">
+    <div className="flex h-full w-full bg-[#F8F9FB] flex-col lg:flex-row overflow-hidden">
       {showInstallPrompt && <IOSInstallPrompt onClose={() => { setShowInstallPrompt(false); localStorage.setItem('lumina_install_prompted', 'true'); }} />}
       
-      {/* Desktop Sidebar (Giữ nguyên) */}
-      <aside className="hidden lg:flex w-20 flex-col items-center py-10 bg-white border-r border-slate-100 z-50">
-        <div className="mb-14"><Zap size={28} className="text-rose-500 fill-rose-500" /></div>
-        <nav className="flex-1 flex flex-col gap-6">
-          <button onClick={() => handleNavigate('dashboard')} className={`p-3 rounded-2xl ${currentView === 'dashboard' ? 'bg-rose-500 text-white shadow-lg' : 'text-slate-400'}`}><Home size={22} /></button>
-          <button onClick={() => handleNavigate('month')} className={`p-3 rounded-2xl ${currentView === 'month' ? 'bg-rose-500 text-white shadow-lg' : 'text-slate-400'}`}><Calendar size={22} /></button>
-          <button onClick={() => handleNavigate('week')} className={`p-3 rounded-2xl ${currentView === 'week' ? 'bg-rose-500 text-white shadow-lg' : 'text-slate-400'}`}><Columns size={22} /></button>
-          <button onClick={() => handleNavigate('day', new Date())} className={`p-3 rounded-2xl ${currentView === 'day' ? 'bg-rose-500 text-white shadow-lg' : 'text-slate-400'}`}><Layout size={22} /></button>
-          <button onClick={() => handleNavigate('vision')} className={`p-3 rounded-2xl ${currentView === 'vision' ? 'bg-rose-500 text-white shadow-lg' : 'text-slate-400'}`}><LayoutDashboard size={22} /></button>
+      {/* Desktop Sidebar */}
+      <aside className="hidden lg:flex w-24 flex-col items-center py-12 bg-white border-r border-slate-100 z-50">
+        <div className="mb-16"><Zap size={32} className="text-rose-500 fill-rose-500" /></div>
+        <nav className="flex-1 flex flex-col gap-8">
+          <button onClick={() => handleNavigate('dashboard')} className={`p-4 rounded-[1.5rem] ${currentView === 'dashboard' ? 'bg-rose-500 text-white shadow-xl shadow-rose-100' : 'text-slate-300'}`}><Home size={24} /></button>
+          <button onClick={() => handleNavigate('month')} className={`p-4 rounded-[1.5rem] ${currentView === 'month' ? 'bg-rose-500 text-white shadow-xl shadow-rose-100' : 'text-slate-300'}`}><Calendar size={24} /></button>
+          <button onClick={() => handleNavigate('week')} className={`p-4 rounded-[1.5rem] ${currentView === 'week' ? 'bg-rose-500 text-white shadow-xl shadow-rose-100' : 'text-slate-300'}`}><Columns size={24} /></button>
+          <button onClick={() => handleNavigate('day', new Date())} className={`p-4 rounded-[1.5rem] ${currentView === 'day' ? 'bg-rose-500 text-white shadow-xl shadow-rose-100' : 'text-slate-300'}`}><Layout size={24} /></button>
+          <button onClick={() => handleNavigate('vision')} className={`p-4 rounded-[1.5rem] ${currentView === 'vision' ? 'bg-rose-500 text-white shadow-xl shadow-rose-100' : 'text-slate-300'}`}><LayoutDashboard size={24} /></button>
         </nav>
       </aside>
 
       {/* Main Container */}
       <div className="flex-1 flex flex-col relative h-full">
-        {/* Mobile Header - Ultra Thin & Glassy */}
-        <header className="lg:hidden shrink-0 apple-glass px-5 border-b border-black/5 flex items-center justify-between sticky top-0 z-50" 
-                style={{ height: 'calc(44px + var(--sat))', paddingTop: 'var(--sat)' }}>
+        {/* Mobile Header */}
+        <header className="lg:hidden shrink-0 apple-glass px-6 border-b border-black/5 flex items-center justify-between sticky top-0 z-[100]" 
+                style={{ height: 'calc(48px + var(--sat))', paddingTop: 'var(--sat)' }}>
           <div className="flex items-center gap-2">
-            <Zap size={18} className="text-rose-500 fill-rose-500" />
-            <h1 className="text-[13px] font-black uppercase tracking-[0.2em] text-slate-900">{getTitle()}</h1>
+            <Zap size={20} className="text-rose-500 fill-rose-500" />
+            <h1 className="text-[14px] font-black uppercase tracking-[0.2em] text-slate-900">{getTitle()}</h1>
           </div>
-          <div className="flex items-center gap-3">
-             <button onClick={() => setRefreshKey(k => k+1)} className="p-1.5 text-slate-400 ios-tap"><RefreshCw size={16} /></button>
-             <div className="w-7 h-7 rounded-full bg-slate-200 overflow-hidden border border-black/5">
+          <div className="flex items-center gap-4">
+             <button onClick={() => setRefreshKey(k => k+1)} className="p-1 text-slate-400 ios-tap"><RefreshCw size={18} /></button>
+             <div className="w-8 h-8 rounded-full bg-slate-200 overflow-hidden border border-black/5 shadow-inner">
                 <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="avatar" />
              </div>
           </div>
@@ -132,9 +129,8 @@ export default function App() {
 
         {/* Content Area */}
         <main className="flex-1 overflow-hidden relative">
-          <div className="scroll-container custom-scrollbar" 
-               style={{ paddingBottom: 'calc(80px + var(--sab))' }}>
-            <div className="max-w-6xl mx-auto px-4 pt-4 lg:p-10" key={refreshKey}>
+          <div className="scroll-container custom-scrollbar">
+            <div className="max-w-6xl mx-auto px-4 pt-6 lg:p-12" key={refreshKey}>
               {currentView === 'dashboard' && <Dashboard onNavigate={handleNavigate} onUpdate={() => setRefreshKey(k => k+1)} />}
               {currentView === 'year' && <YearView onSelectDate={(d) => { setCurrentDate(d); handleNavigate('month'); }} refreshKey={refreshKey} />}
               {currentView === 'month' && <MonthView date={currentDate} onSelectDate={(d) => { setCurrentDate(d); handleNavigate('day'); }} refreshKey={refreshKey} onUpdate={() => setRefreshKey(k => k+1)} />}
@@ -145,21 +141,14 @@ export default function App() {
           </div>
         </main>
 
-        {/* Floating Action Button for Mobile */}
-        {currentView === 'day' && (
-          <button className="lg:hidden fixed bottom-24 right-6 w-14 h-14 bg-rose-500 text-white rounded-full shadow-2xl flex items-center justify-center ios-tap z-[100]">
-            <Plus size={28} strokeWidth={3} />
-          </button>
-        )}
-
-        {/* iOS Style Floating Tab Bar */}
-        <div className="lg:hidden fixed bottom-0 left-0 right-0 z-[100] px-4 pb-[var(--sab)] mb-2">
-           <nav className="apple-glass rounded-[2rem] h-[64px] flex items-center justify-around px-2 shadow-2xl border border-white/40 ring-1 ring-black/5">
-              <MobileTab icon={<Home />} label="Home" active={currentView === 'dashboard'} onClick={() => handleNavigate('dashboard')} />
-              <MobileTab icon={<Calendar />} label="Month" active={currentView === 'month'} onClick={() => handleNavigate('month')} />
-              <MobileTab icon={<Columns />} label="Week" active={currentView === 'week'} onClick={() => handleNavigate('week')} />
-              <MobileTab icon={<Layout />} label="Day" active={currentView === 'day'} onClick={() => handleNavigate('day', new Date())} />
-              <MobileTab icon={<LayoutDashboard />} label="Vision" active={currentView === 'vision'} onClick={() => handleNavigate('vision')} />
+        {/* iOS Style Floating Tab Bar - Fixed Padding Bottom */}
+        <div className="lg:hidden fixed bottom-0 left-0 right-0 z-[150] px-4 pb-[calc(16px + var(--sab))]">
+           <nav className="apple-glass rounded-[2.5rem] h-[72px] flex items-center justify-around px-2 shadow-[0_15px_40px_rgba(0,0,0,0.1)] border border-white/50 ring-1 ring-black/5">
+              <MobileTab icon={<Home />} label="HOME" active={currentView === 'dashboard'} onClick={() => handleNavigate('dashboard')} />
+              <MobileTab icon={<Calendar />} label="MONTH" active={currentView === 'month'} onClick={() => handleNavigate('month')} />
+              <MobileTab icon={<Columns />} label="WEEK" active={currentView === 'week'} onClick={() => handleNavigate('week')} />
+              <MobileTab icon={<Layout />} label="DAY" active={currentView === 'day'} onClick={() => handleNavigate('day', new Date())} />
+              <MobileTab icon={<LayoutDashboard />} label="VISION" active={currentView === 'vision'} onClick={() => handleNavigate('vision')} />
            </nav>
         </div>
       </div>

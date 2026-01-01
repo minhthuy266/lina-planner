@@ -45,13 +45,12 @@
         :root {
             --sat: env(safe-area-inset-top);
             --sab: env(safe-area-inset-bottom);
-            --vh: 1vh;
         }
 
         /* KHÓA CỨNG KHUNG HÌNH CHỐNG HỞ ĐÁY */
         html {
             height: -webkit-fill-available;
-            background-color: #F2F2F7;
+            background-color: #F8F9FB;
         }
 
         body {
@@ -60,12 +59,12 @@
             width: 100%;
             height: 100%;
             height: -webkit-fill-available;
-            overflow: hidden; /* Quan trọng: Không cho body scroll */
-            position: fixed; /* Ép body không di chuyển */
+            overflow: hidden; 
+            position: fixed;
             font-family: 'Be Vietnam Pro', sans-serif;
-            background-color: #F2F2F7;
+            background-color: #F8F9FB;
             -webkit-font-smoothing: antialiased;
-            touch-action: none; /* Chỉ cho phép touch nội bộ */
+            touch-action: none;
         }
 
         #root {
@@ -75,12 +74,13 @@
             flex-direction: column;
         }
 
-        /* Container nội dung tự scroll */
         .scroll-container {
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
             height: 100%;
             touch-action: pan-y;
+            /* Phải khớp với chiều cao của Tab bar + Sab */
+            padding-bottom: calc(100px + var(--sab));
         }
 
         .no-select {
@@ -89,51 +89,38 @@
             user-select: none;
         }
 
-        /* Glassmorphism chuẩn Apple */
         .apple-glass {
-            background: rgba(255, 255, 255, 0.7);
+            background: rgba(255, 255, 255, 0.8);
             backdrop-filter: saturate(180%) blur(20px);
             -webkit-backdrop-filter: saturate(180%) blur(20px);
         }
 
-        /* Nút bấm hiệu ứng native */
         .ios-tap:active {
             transform: scale(0.96);
             opacity: 0.8;
             transition: transform 0.1s ease;
         }
 
-        /* Scroll bar ẩn */
         .custom-scrollbar::-webkit-scrollbar {
             display: none;
         }
         
-        /* Chống kéo trang hở nền trắng trên iOS */
         main {
             overscroll-behavior-y: contain;
         }
     </style>
-    <script>
-        // Tính toán lại vh để fix lỗi Safari
-        function updateVH() {
-            let vh = window.innerHeight * 0.01;
-            document.documentElement.style.setProperty('--vh', `${vh}px`);
-        }
-        window.addEventListener('resize', updateVH);
-        updateVH();
-    </script>
 <script type="importmap">
 {
   "imports": {
     "react": "https://esm.sh/react@^19.2.3",
-    "react/": "https://esm.sh/react@^19.2.3/",
     "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "react/": "https://esm.sh/react@^19.2.3/",
     "@google/genai": "https://esm.sh/@google/genai@^1.34.0",
-    "date-fns": "https://esm.sh/date-fns@^4.1.0",
-    "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@^2.89.0",
     "lucide-react": "https://esm.sh/lucide-react@^0.562.0",
-    "vite": "https://esm.sh/vite@^7.3.0",
+    "date-fns": "https://esm.sh/date-fns@^4.1.0",
     "date-fns/": "https://esm.sh/date-fns@^4.1.0/",
+    "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@^2.89.0",
+    "vite": "https://esm.sh/vite@^7.3.0",
     "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2"
   }
 }
