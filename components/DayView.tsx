@@ -47,6 +47,7 @@ const DayView: React.FC<DayViewProps> = ({ date, onUpdate, refreshKey }) => {
   const [newHabitTitle, setNewHabitTitle] = useState('');
   const [isManagingHabits, setIsManagingHabits] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const isSavingRef = useRef(false);
 
   const hours = Array.from({ length: 16 }, (_, i) => i + 6); // 6 AM to 9 PM
 
@@ -122,20 +123,33 @@ const DayView: React.FC<DayViewProps> = ({ date, onUpdate, refreshKey }) => {
     }
   };
 
+  // FIX DUPLICATE: Sử dụng guard và xóa state ngay lập tức
   const handleAddTask = async (title: string, time?: string) => {
-    if (!title.trim()) { setActiveHour(null); return; }
+    const trimmedTitle = title.trim();
+    if (!trimmedTitle || isSavingRef.current) {
+      setActiveHour(null);
+      setInputValue('');
+      return;
+    }
+
+    isSavingRef.current = true;
+    const valToSave = trimmedTitle;
+    
+    // UI Feedback lập tức: Đóng khung và xóa chữ để tránh nhấn đúp
+    setActiveHour(null);
+    setInputValue('');
+
     const newTask = await dataService.createTask({
-      title,
+      title: valToSave,
       date: format(date, 'yyyy-MM-dd'),
       startTime: time,
       priority: 'medium'
     });
+
     if (newTask) {
-      setTasks(prev => [...prev, newTask]);
       if (onUpdate) onUpdate();
     }
-    setActiveHour(null);
-    setInputValue('');
+    isSavingRef.current = false;
   };
 
   const handleToggleTask = async (task: Task) => {
@@ -169,7 +183,7 @@ const DayView: React.FC<DayViewProps> = ({ date, onUpdate, refreshKey }) => {
          <div>
             <div className="flex items-center gap-2 mb-1">
                <Zap size={14} className="text-amber-500 fill-amber-500" />
-               <p className="text-[10px] font-black text-slate-400 dark:text-slate-600 uppercase tracking-[0.4em]">LifeFlow Terminal</p>
+               <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.4em]">LifeFlow Terminal</p>
             </div>
             <h2 className="text-4xl font-serif italic text-slate-900 dark:text-white">{format(date, 'eeee, dd/MM', { locale: vi })}</h2>
          </div>
@@ -197,7 +211,7 @@ const DayView: React.FC<DayViewProps> = ({ date, onUpdate, refreshKey }) => {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         <div className="lg:col-span-4 space-y-6">
-           <section className="bg-indigo-600 dark:bg-indigo-900/50 rounded-[2.5rem] p-6 text-white shadow-xl shadow-indigo-100 dark:shadow-none relative overflow-hidden">
+           <section className="bg-indigo-600 dark:bg-indigo-900/40 rounded-[2.5rem] p-6 text-white shadow-xl shadow-indigo-100 dark:shadow-none relative overflow-hidden">
               <Sun className="absolute -right-4 -top-4 w-24 h-24 text-white/10" />
               <div className="relative z-10">
                  <h3 className="text-xs font-black uppercase tracking-widest mb-4 flex items-center gap-2">
@@ -212,7 +226,7 @@ const DayView: React.FC<DayViewProps> = ({ date, onUpdate, refreshKey }) => {
                          onChange={(e) => updateReflectionLocally({ focus: e.target.value })}
                          onBlur={() => saveReflectionToDB(reflection)}
                          placeholder="Một việc quan trọng nhất..."
-                         className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-sm font-bold placeholder:text-white/40 outline-none focus:bg-white/20 transition-all"
+                         className="w-full bg-white/10 dark:bg-black/20 border border-white/20 dark:border-white/5 rounded-xl px-4 py-3 text-sm font-bold placeholder:text-white/40 outline-none focus:bg-white/20 transition-all"
                        />
                     </div>
                     <div>
@@ -222,7 +236,7 @@ const DayView: React.FC<DayViewProps> = ({ date, onUpdate, refreshKey }) => {
                          value={reflection.energyLevel}
                          onChange={(e) => updateReflectionLocally({ energyLevel: parseInt(e.target.value) })}
                          onMouseUp={() => saveReflectionToDB(reflection)}
-                         className="w-full h-1.5 bg-white/20 rounded-lg appearance-none cursor-pointer accent-white"
+                         className="w-full h-1.5 bg-white/20 dark:bg-white/10 rounded-lg appearance-none cursor-pointer accent-white"
                        />
                     </div>
                  </div>
@@ -246,11 +260,11 @@ const DayView: React.FC<DayViewProps> = ({ date, onUpdate, refreshKey }) => {
                        <input 
                           type="text" 
                           placeholder="Thói quen mới..." 
-                          className="flex-1 bg-slate-50 dark:bg-black/20 border border-slate-100 dark:border-white/10 rounded-xl px-3 py-2 text-xs font-bold outline-none focus:border-rose-200 dark:text-white"
+                          className="flex-1 bg-slate-50 dark:bg-black/30 border border-slate-100 dark:border-white/10 rounded-xl px-3 py-2 text-xs font-bold outline-none focus:border-rose-200 dark:text-white"
                           value={newHabitTitle}
                           onChange={(e) => setNewHabitTitle(e.target.value)}
                        />
-                       <button onClick={handleAddHabit} className="bg-rose-500 text-white p-2 rounded-xl"><Plus size={16}/></button>
+                       <button onClick={handleAddHabit} className="bg-rose-500 text-white p-2 rounded-xl active:scale-95"><Plus size={16}/></button>
                     </div>
                  )}
                  {habits.map(habit => {
@@ -267,10 +281,10 @@ const DayView: React.FC<DayViewProps> = ({ date, onUpdate, refreshKey }) => {
                               <Check size={18} strokeWidth={3} />
                            </div>
                            <div className="flex flex-col items-start">
-                              <span className={`text-[8px] font-black uppercase tracking-widest ${isDone ? 'text-slate-300 dark:text-slate-700' : 'text-slate-400 dark:text-slate-600'}`}>
+                              <span className={`text-[8px] font-black uppercase tracking-widest ${isDone ? 'text-slate-300 dark:text-slate-600' : 'text-slate-400 dark:text-slate-500'}`}>
                                  STREAK: {habit.streak} NGÀY
                               </span>
-                              <span className={`text-xs font-bold ${isDone ? 'text-slate-300 dark:text-slate-700 line-through' : 'text-slate-800 dark:text-slate-200'}`}>{habit.title}</span>
+                              <span className={`text-xs font-bold ${isDone ? 'text-slate-300 dark:text-slate-600 line-through' : 'text-slate-800 dark:text-slate-200'}`}>{habit.title}</span>
                            </div>
                         </button>
                         {isManagingHabits && (
@@ -282,7 +296,7 @@ const DayView: React.FC<DayViewProps> = ({ date, onUpdate, refreshKey }) => {
               </div>
            </div>
 
-           <section className="bg-slate-900 dark:bg-black/80 rounded-[2.5rem] p-6 text-white shadow-xl relative overflow-hidden">
+           <section className="bg-slate-900 dark:bg-black/60 rounded-[2.5rem] p-6 text-white shadow-xl relative overflow-hidden">
               <Moon className="absolute -right-4 -top-4 w-24 h-24 text-white/5" />
               <div className="relative z-10">
                  <h3 className="text-xs font-black uppercase tracking-widest mb-4 flex items-center gap-2">
@@ -302,7 +316,7 @@ const DayView: React.FC<DayViewProps> = ({ date, onUpdate, refreshKey }) => {
                         }}
                         onBlur={() => saveReflectionToDB(reflection)}
                         placeholder={`${idx + 1}. Tôi biết ơn vì...`}
-                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-xs font-bold placeholder:text-white/20 outline-none focus:bg-white/10 transition-all"
+                        className="w-full bg-white/5 dark:bg-black/20 border border-white/10 dark:border-white/5 rounded-xl px-4 py-2.5 text-xs font-bold placeholder:text-white/20 outline-none focus:bg-white/10 transition-all"
                       />
                     ))}
                     <div className="pt-2 flex justify-between items-center">
@@ -335,7 +349,7 @@ const DayView: React.FC<DayViewProps> = ({ date, onUpdate, refreshKey }) => {
 
         <div className="lg:col-span-8 flex flex-col gap-6">
           <div className="bg-white dark:bg-[#1C1C1E] rounded-[2.5rem] shadow-sm border border-slate-50 dark:border-white/5 overflow-hidden flex flex-col min-h-[600px]">
-            <div className="p-8 border-b border-slate-50 dark:border-white/5 flex items-center justify-between shrink-0 bg-slate-50/50 dark:bg-black/10">
+            <div className="p-8 border-b border-slate-50 dark:border-white/5 flex items-center justify-between shrink-0 bg-slate-50/50 dark:bg-black/20">
                <div className="flex items-center gap-2">
                  <div className="w-8 h-8 rounded-xl bg-indigo-500 flex items-center justify-center text-white shadow-lg shadow-indigo-100 dark:shadow-none">
                     <Clock size={16} />
@@ -358,11 +372,11 @@ const DayView: React.FC<DayViewProps> = ({ date, onUpdate, refreshKey }) => {
             
             <div className="p-8 space-y-8 flex-1">
                <div className="flex items-center gap-4 bg-white dark:bg-white/5 p-4 rounded-2xl border-2 border-slate-50 dark:border-white/5 shadow-sm focus-within:border-indigo-100 dark:focus-within:border-indigo-500/30 transition-all">
-                  <div className="w-10 h-10 rounded-xl bg-slate-50 dark:bg-black/20 flex items-center justify-center text-slate-400 dark:text-slate-600"><Plus size={20} /></div>
+                  <div className="w-10 h-10 rounded-xl bg-slate-50 dark:bg-black/30 flex items-center justify-center text-slate-400 dark:text-slate-600"><Plus size={20} /></div>
                   <input 
                     type="text"
                     placeholder="Đặt mục tiêu thực thi mới cho hôm nay..."
-                    className="bg-transparent text-sm font-bold outline-none w-full placeholder:text-slate-300 dark:text-slate-700 dark:text-white"
+                    className="bg-transparent text-sm font-bold outline-none w-full placeholder:text-slate-300 dark:placeholder:text-slate-700 dark:text-white"
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') {
                         handleAddTask((e.target as HTMLInputElement).value);
@@ -373,7 +387,7 @@ const DayView: React.FC<DayViewProps> = ({ date, onUpdate, refreshKey }) => {
                </div>
 
                <div className="relative pl-12 space-y-4 mb-10">
-                  <div className="absolute left-6 top-0 bottom-0 w-px bg-gradient-to-b from-indigo-500 via-indigo-100 dark:via-indigo-900 to-transparent"></div>
+                  <div className="absolute left-6 top-0 bottom-0 w-px bg-gradient-to-b from-indigo-500 via-indigo-100 dark:via-indigo-900/50 to-transparent"></div>
                   {hours.map((hour) => {
                     const timeLabel = `${hour.toString().padStart(2, '0')}:00`;
                     const tasksAtHour = tasks.filter(t => t.startTime === timeLabel);
@@ -381,9 +395,9 @@ const DayView: React.FC<DayViewProps> = ({ date, onUpdate, refreshKey }) => {
 
                     return (
                       <div key={hour} className={`flex items-start gap-6 group relative`}>
-                        <div className="absolute left-[-28px] top-1 w-2.5 h-2.5 rounded-full border-2 border-indigo-500 bg-white dark:bg-black z-10 group-hover:scale-150 transition-all"></div>
+                        <div className="absolute left-[-28px] top-1 w-2.5 h-2.5 rounded-full border-2 border-indigo-500 bg-white dark:bg-[#1C1C1E] z-10 group-hover:scale-150 transition-all"></div>
                         <div className="w-16 shrink-0 pt-0.5">
-                          <span className="text-[10px] font-black text-slate-400 dark:text-slate-700 uppercase tracking-tighter">
+                          <span className="text-[10px] font-black text-slate-400 dark:text-slate-600 uppercase tracking-tighter">
                             {hour > 12 ? `${hour-12} PM` : hour === 12 ? '12 PM' : `${hour} AM`}
                           </span>
                         </div>
@@ -418,12 +432,19 @@ const DayView: React.FC<DayViewProps> = ({ date, onUpdate, refreshKey }) => {
                                 placeholder="Viết hành động cụ thể..."
                                 value={inputValue}
                                 onChange={(e) => setInputValue(e.target.value)}
-                                onKeyDown={(e) => e.key === 'Enter' && handleAddTask(inputValue, timeLabel)}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') {
+                                    handleAddTask(inputValue, timeLabel);
+                                  }
+                                }}
                               />
                             </div>
                           ) : (
                             <button 
-                              onClick={() => setActiveHour(timeLabel)} 
+                              onClick={() => {
+                                setInputValue('');
+                                setActiveHour(timeLabel);
+                              }} 
                               className="text-[10px] font-black text-slate-300 dark:text-slate-700 uppercase tracking-widest opacity-0 group-hover:opacity-100 hover:text-indigo-500 dark:hover:text-indigo-400 transition-all py-2"
                             >
                                + Dành thời gian
@@ -435,7 +456,7 @@ const DayView: React.FC<DayViewProps> = ({ date, onUpdate, refreshKey }) => {
                   })}
                </div>
 
-               <div className="mt-12 bg-slate-50/50 dark:bg-black/20 rounded-[2.5rem] p-8 border border-slate-100 dark:border-white/5">
+               <div className="mt-12 bg-slate-50/50 dark:bg-black/30 rounded-[2.5rem] p-8 border border-slate-100 dark:border-white/5">
                   <div className="flex items-center gap-3 mb-4 text-left">
                     <div className="w-10 h-10 rounded-xl bg-slate-900 dark:bg-white/10 text-white flex items-center justify-center">
                        <BookOpen size={20} />

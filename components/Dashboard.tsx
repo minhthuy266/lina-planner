@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
-import { format, subDays } from 'date-fns';
+// Fix: Removed unused and non-existent member 'subDays' from date-fns import
+import { format } from 'date-fns';
 import { vi } from 'date-fns/locale/vi';
 import { 
   Zap, 
@@ -91,8 +92,8 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate, onUpdate }) => {
          <div className="w-14 h-14 bg-amber-50 dark:bg-amber-500/10 rounded-2xl flex items-center justify-center text-amber-600 dark:text-amber-500 shrink-0">
             <Coffee size={28} />
          </div>
-         <div className="flex-1">
-            <h2 className="text-[20px] font-black leading-tight">Buổi tối an yên, má nghỉ ngơi nhé!</h2>
+         <div className="flex-1 text-left">
+            <h2 className="text-[20px] font-black leading-tight dark:text-white">Mời má dùng trà, bắt đầu ngày mới!</h2>
             <p className="text-[10px] font-bold text-rose-500 flex items-center gap-1.5 mt-1 uppercase tracking-wide">
                <Zap size={10} className="fill-rose-500" /> {aiInsight}
             </p>
@@ -101,29 +102,29 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate, onUpdate }) => {
 
       {/* 2. Status Pill */}
       <div className="flex justify-center">
-        <div className="bg-white dark:bg-[#1C1C1E] px-8 py-3 rounded-full border border-slate-100 dark:border-white/5 shadow-sm text-center">
+        <div className="bg-white dark:bg-[#1C1C1E] px-8 py-3 rounded-full border border-slate-100 dark:border-white/10 shadow-sm text-center">
            <p className="text-[8px] font-black text-slate-300 dark:text-slate-600 uppercase tracking-widest">TRẠNG THÁI</p>
-           <p className="text-[11px] font-black uppercase">CẦN XỬ LÝ</p>
+           <p className="text-[11px] font-black uppercase dark:text-white">CẦN XỬ LÝ</p>
         </div>
       </div>
 
       {/* 3. Hero Stack */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         <div className="lg:col-span-4 bg-white dark:bg-[#1C1C1E] rounded-[3rem] p-8 shadow-sm border border-slate-50 dark:border-white/5 flex flex-col justify-between min-h-[340px]">
-           <div>
+           <div className="text-left">
               <div className="flex items-center gap-2 mb-4">
                  <Clock size={16} className="text-rose-400" />
                  <span className="text-[10px] font-black text-slate-300 dark:text-slate-600 uppercase tracking-[0.3em]">THỜI KHẮC HIỆN TẠI</span>
               </div>
               <h3 className="text-[80px] font-black tracking-tighter leading-none dark:text-white">{format(currentTime, 'HH:mm')}</h3>
-              <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest mt-2">{format(currentTime, 'eeee, dd MMMM yyyy', { locale: vi })}</p>
+              <p className="text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-2">{format(currentTime, 'eeee, dd MMMM yyyy', { locale: vi })}</p>
            </div>
            
            <div className="relative mt-10">
               <input 
                 type="text" 
                 placeholder="Thêm nhanh việc..."
-                className="w-full bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/10 rounded-[2rem] py-5 px-8 text-sm font-bold outline-none focus:border-rose-200 transition-all placeholder:text-slate-300 dark:text-white"
+                className="w-full bg-slate-50 dark:bg-black/30 border border-slate-100 dark:border-white/10 rounded-[2rem] py-5 px-8 text-sm font-bold outline-none focus:border-rose-200 transition-all placeholder:text-slate-300 dark:placeholder:text-slate-700 dark:text-white"
                 value={quickTaskTitle}
                 onChange={(e) => setQuickTaskTitle(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleQuickAdd()}
@@ -134,25 +135,25 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate, onUpdate }) => {
            </div>
         </div>
 
-        <div className="lg:col-span-8 bg-[#EF233C] rounded-[3rem] p-10 text-white shadow-2xl shadow-rose-200 dark:shadow-rose-900/10 flex flex-col justify-between gap-8 relative overflow-hidden group min-h-[340px]">
+        <div className="lg:col-span-8 bg-[#EF233C] dark:bg-rose-700/80 rounded-[3rem] p-10 text-white shadow-2xl shadow-rose-200 dark:shadow-none flex flex-col justify-between gap-8 relative overflow-hidden group min-h-[340px]">
            <div className="absolute top-0 right-0 w-80 h-80 bg-white/5 rounded-full -mr-32 -mt-32 blur-3xl"></div>
-           <div className="relative z-10">
+           <div className="relative z-10 text-left">
               <div className="flex items-center gap-2 mb-8 opacity-70">
                  <AlertCircle size={20} />
                  <span className="text-[11px] font-black uppercase tracking-[0.4em]">ƯU TIÊN CẤP BÁCH</span>
               </div>
               <h3 className="text-4xl md:text-5xl font-black tracking-tighter mb-8 leading-tight">
-                Cần xử lý {overdueTasks.length || 1} việc trễ!
+                Cần xử lý {overdueTasks.length || 0} việc trễ!
               </h3>
               <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/10 max-w-md">
                  <p className="text-[15px] font-bold opacity-90 italic">
-                    "{overdueTasks[0]?.title || "Anh chưa hoàn thành mục tiêu sáng..."}"
+                    "{overdueTasks[0]?.title || "Má ơi, hôm nay má muốn làm gì nhất?"}"
                  </p>
               </div>
            </div>
            <button 
              onClick={() => onNavigate('day')}
-             className="relative z-10 w-full md:w-auto bg-white text-[#EF233C] px-10 py-6 rounded-[2rem] font-black text-[12px] uppercase tracking-[0.2em] flex items-center justify-center gap-4 shadow-xl active:scale-95 transition-all"
+             className="relative z-10 w-full md:w-auto bg-white dark:bg-white/90 text-[#EF233C] px-10 py-6 rounded-[2rem] font-black text-[12px] uppercase tracking-[0.2em] flex items-center justify-center gap-4 shadow-xl active:scale-95 transition-all"
            >
               XỬ LÝ NGAY <ArrowRight size={20} />
            </button>
@@ -161,7 +162,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate, onUpdate }) => {
 
       {/* 4. Achievement Row */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        <div className="bg-[#0D1117] dark:bg-[#1C1C1E] rounded-[3.5rem] p-10 text-white shadow-2xl flex flex-col justify-between min-h-[460px] lg:col-span-4">
+        <div className="bg-[#0D1117] dark:bg-[#1C1C1E] rounded-[3.5rem] p-10 text-white shadow-2xl flex flex-col justify-between min-h-[460px] lg:col-span-4 border border-white/5">
            <div>
               <div className="flex items-center gap-4 mb-12">
                  <div className="w-12 h-12 bg-amber-500/10 rounded-[1.2rem] flex items-center justify-center text-amber-500">
@@ -175,22 +176,22 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate, onUpdate }) => {
                     <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">TIẾN ĐỘ HÔM NAY</span>
                     <span className="text-4xl font-black">{habitPercent}%</span>
                  </div>
-                 <div className="h-2.5 bg-slate-900 dark:bg-black rounded-full overflow-hidden">
+                 <div className="h-2.5 bg-slate-900 dark:bg-black/50 rounded-full overflow-hidden">
                     <div className="h-full bg-amber-400 transition-all duration-1000" style={{ width: `${habitPercent}%` }} />
                  </div>
               </div>
 
-              <div className="bg-[#161B22] dark:bg-black/40 rounded-[2.5rem] p-8 border border-slate-800 dark:border-white/5 flex items-center gap-8">
+              <div className="bg-[#161B22] dark:bg-black/40 rounded-[2.5rem] p-8 border border-slate-800 dark:border-white/10 flex items-center gap-8">
                  <div className="text-center">
                     <p className="text-[9px] font-black text-slate-500 uppercase mb-2 tracking-widest">CHUỖI ĐỈNH</p>
                     <p className="text-5xl font-black text-amber-500 tracking-tighter">{maxStreak}</p>
                  </div>
-                 <div className="w-px h-16 bg-slate-800"></div>
-                 <p className="text-[12px] font-bold text-slate-400 italic leading-relaxed">"Tuyệt vời má ơi! Kỷ luật là chìa khóa của tự do."</p>
+                 <div className="w-px h-16 bg-slate-800 dark:bg-white/10"></div>
+                 <p className="text-[12px] font-bold text-slate-400 italic leading-relaxed text-left flex-1">"Tuyệt vời má ơi! Kỷ luật là chìa khóa giúp chúng ta tự do và hạnh phúc hơn."</p>
               </div>
            </div>
            
-           <button onClick={() => onNavigate('day')} className="w-full mt-8 py-5 bg-white/5 hover:bg-white/10 rounded-[1.5rem] text-[10px] font-black uppercase tracking-[0.25em] transition-all active:scale-95">CHI TIẾT THÀNH TỰU</button>
+           <button onClick={() => onNavigate('day')} className="w-full mt-8 py-5 bg-white/5 hover:bg-white/10 rounded-[1.5rem] text-[10px] font-black uppercase tracking-[0.25em] transition-all active:scale-95 border border-white/5">CHI TIẾT THÀNH TỰU</button>
         </div>
       </div>
     </div>
